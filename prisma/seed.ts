@@ -1,0 +1,154 @@
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
+
+const prisma = new PrismaClient();
+
+async function main() {
+  console.log("🌱 Iniciando seed do banco de dados...");
+
+  // ─── Escritório Demo ───────────────────────────────────────────────────────
+  const escritorio = await prisma.escritorio.upsert({
+    where: { cnpj: "00.000.000/0001-00" },
+    update: {},
+    create: {
+      nome: "Escritório Contábil Exemplo",
+      cnpj: "00.000.000/0001-00",
+      email: "contato@escritorioexemplo.com.br",
+      telefone: "(11) 3000-0000",
+      plano: "PROFISSIONAL",
+    },
+  });
+
+  // ─── Usuário Admin ─────────────────────────────────────────────────────────
+  await prisma.usuario.upsert({
+    where: { email: "admin@escritorioexemplo.com.br" },
+    update: {},
+    create: {
+      escritorioId: escritorio.id,
+      nome: "Administrador",
+      email: "admin@escritorioexemplo.com.br",
+      senha: await bcrypt.hash("Admin@2026", 12),
+      perfil: "ADMIN",
+    },
+  });
+
+  // ─── Tabela INSS 2026 ──────────────────────────────────────────────────────
+  await prisma.tabelaINSS.upsert({
+    where: { ano: 2026 },
+    update: {},
+    create: {
+      ano: 2026,
+      vigencia: new Date("2026-01-01"),
+      faixas: [
+        { de: 0,        ate: 1518.00,  aliquota: 7.5  },
+        { de: 1518.01,  ate: 2793.88,  aliquota: 9.0  },
+        { de: 2793.89,  ate: 4190.83,  aliquota: 12.0 },
+        { de: 4190.84,  ate: 8157.41,  aliquota: 14.0 },
+      ],
+      tetoContribuicao: 8157.41,
+      salarioMinimo: 1621.00,
+      ativa: true,
+    },
+  });
+
+  // ─── Tabela IRRF 2026 ──────────────────────────────────────────────────────
+  await prisma.tabelaIRRF.upsert({
+    where: { ano: 2026 },
+    update: {},
+    create: {
+      ano: 2026,
+      vigencia: new Date("2026-01-01"),
+      faixas: [
+        { de: 0,        ate: 2259.20,  aliquota: 0,    deducao: 0      },
+        { de: 2259.21,  ate: 2826.65,  aliquota: 7.5,  deducao: 169.44 },
+        { de: 2826.66,  ate: 3751.05,  aliquota: 15,   deducao: 381.44 },
+        { de: 3751.06,  ate: 4664.68,  aliquota: 22.5, deducao: 662.77 },
+        { de: 4664.69,  ate: 99999999, aliquota: 27.5, deducao: 896.00 },
+      ],
+      deducaoPorDependente: 189.59,
+      deducaoSimplificada: 564.80,
+      limiteIsencao: 5000.00,
+      usaRedutorAdicional: true,
+      redutorAdicional: [
+        { de: 5000.01, ate: 7350.00, tipo: "proporcional" },
+      ],
+      ativa: true,
+    },
+  });
+
+  // ─── Tabela FGTS 2026 ─────────────────────────────────────────────────────
+  await prisma.tabelaFGTS.upsert({
+    where: { ano: 2026 },
+    update: {},
+    create: {
+      ano: 2026,
+      aliquota: 8.0,
+      aliquotaJovemAprendiz: 2.0,
+      vigencia: new Date("2026-01-01"),
+      ativa: true,
+    },
+  });
+
+  // ─── Salário Mínimo 2026 ───────────────────────────────────────────────────
+  await prisma.tabelaSalarioMinimo.upsert({
+    where: { ano: 2026 },
+    update: {},
+    create: {
+      ano: 2026,
+      valor: 1621.00,
+      vigencia: new Date("2026-01-01"),
+      ativa: true,
+    },
+  });
+
+  // ─── Rubricas Padrão ──────────────────────────────────────────────────────
+  const rubricasPadrao = [
+    // PROVENTOS
+    { codigo: "0001", descricao: "Salário Base",           tipo: "PROVENTO",     naturezaESocial: "1000", incideINSS: true,  incideFGTS: true,  incideIRRF: true,  incide13: true,  incideFerias: true,  incideRescisao: true  },
+    { codigo: "0002", descricao: "Salário Proporcional",   tipo: "PROVENTO",     naturezaESocial: "1000", incideINSS: true,  incideFGTS: true,  incideIRRF: true,  incide13: true,  incideFerias: true,  incideRescisao: true  },
+    { codigo: "0010", descricao: "Hora Extra 50%",         tipo: "PROVENTO",     naturezaESocial: "1011", incideINSS: true,  incideFGTS: true,  incideIRRF: true,  incide13: true,  incideFerias: true,  incideRescisao: false },
+    { codigo: "0011", descricao: "Hora Extra 100%",        tipo: "PROVENTO",     naturezaESocial: "1012", incideINSS: true,  incideFGTS: true,  incideIRRF: true,  incide13: true,  incideFerias: true,  incideRescisao: false },
+    { codigo: "0020", descricao: "Adicional Noturno",      tipo: "PROVENTO",     naturezaESocial: "1010", incideINSS: true,  incideFGTS: true,  incideIRRF: true,  incide13: true,  incideFerias: true,  incideRescisao: false },
+    { codigo: "0030", descricao: "Adicional Insalubridade",tipo: "PROVENTO",     naturezaESocial: "1010", incideINSS: true,  incideFGTS: true,  incideIRRF: true,  incide13: true,  incideFerias: true,  incideRescisao: false },
+    { codigo: "0031", descricao: "Adicional Periculosidade",tipo:"PROVENTO",     naturezaESocial: "1010", incideINSS: true,  incideFGTS: true,  incideIRRF: true,  incide13: true,  incideFerias: true,  incideRescisao: false },
+    { codigo: "0040", descricao: "Comissões",              tipo: "PROVENTO",     naturezaESocial: "1040", incideINSS: true,  incideFGTS: true,  incideIRRF: true,  incide13: true,  incideFerias: true,  incideRescisao: false },
+    { codigo: "0050", descricao: "Adiantamento Salarial",  tipo: "PROVENTO",     naturezaESocial: "1799", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
+    { codigo: "0060", descricao: "PLR",                    tipo: "PROVENTO",     naturezaESocial: "1600", incideINSS: false, incideFGTS: false, incideIRRF: true,  incide13: false, incideFerias: false, incideRescisao: false },
+    { codigo: "0200", descricao: "Férias — Gozo",          tipo: "PROVENTO",     naturezaESocial: "1200", incideINSS: true,  incideFGTS: false, incideIRRF: true,  incide13: false, incideFerias: false, incideRescisao: false },
+    { codigo: "0201", descricao: "1/3 Constitucional Férias",tipo:"PROVENTO",   naturezaESocial: "1210", incideINSS: true,  incideFGTS: false, incideIRRF: true,  incide13: false, incideFerias: false, incideRescisao: false },
+    { codigo: "0202", descricao: "Abono Pecuniário",       tipo: "PROVENTO",     naturezaESocial: "1220", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
+    { codigo: "0300", descricao: "13º Salário 1ª Parcela", tipo: "PROVENTO",     naturezaESocial: "1100", incideINSS: false, incideFGTS: true,  incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
+    { codigo: "0301", descricao: "13º Salário 2ª Parcela", tipo: "PROVENTO",     naturezaESocial: "1110", incideINSS: true,  incideFGTS: true,  incideIRRF: true,  incide13: false, incideFerias: false, incideRescisao: false },
+    // DESCONTOS
+    { codigo: "1000", descricao: "INSS — Empregado",       tipo: "DESCONTO",     naturezaESocial: "3000", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
+    { codigo: "1001", descricao: "IRRF",                   tipo: "DESCONTO",     naturezaESocial: "3500", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
+    { codigo: "1010", descricao: "Desconto Vale-Transporte",tipo:"DESCONTO",     naturezaESocial: "4000", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
+    { codigo: "1020", descricao: "Desconto Plano de Saúde",tipo: "DESCONTO",     naturezaESocial: "4010", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
+    { codigo: "1030", descricao: "Desconto Falta",         tipo: "DESCONTO",     naturezaESocial: "4099", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
+    { codigo: "1040", descricao: "Pensão Alimentícia",     tipo: "DESCONTO",     naturezaESocial: "4099", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
+    { codigo: "1050", descricao: "Adiantamento Salarial (desc.)",tipo:"DESCONTO",naturezaESocial: "4050", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
+    // INFORMATIVOS
+    { codigo: "9001", descricao: "FGTS — Depósito Mensal", tipo: "INFORMATIVO",  naturezaESocial: "9001", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
+    { codigo: "9010", descricao: "Vale-Alimentação (PAT)", tipo: "INFORMATIVO",  naturezaESocial: "1811", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
+    { codigo: "9020", descricao: "Vale-Transporte Bruto",  tipo: "INFORMATIVO",  naturezaESocial: "1812", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
+  ];
+
+  for (const r of rubricasPadrao) {
+    await prisma.rubrica.upsert({
+      where: { codigo: r.codigo },
+      update: r,
+      create: { ...r, global: true },
+    });
+  }
+
+  console.log("✅ Seed concluído com sucesso!");
+  console.log(`\n📧 Login: admin@escritorioexemplo.com.br`);
+  console.log(`🔑 Senha: Admin@2026`);
+}
+
+main()
+  .catch((e) => {
+    console.error("❌ Erro no seed:", e);
+    process.exit(1);
+  })
+  .finally(() => prisma.$disconnect());
