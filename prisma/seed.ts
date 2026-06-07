@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, TipoRubrica } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
@@ -102,35 +102,39 @@ async function main() {
   });
 
   // ─── Rubricas Padrão ──────────────────────────────────────────────────────
-  const rubricasPadrao = [
+  const rubricasPadrao: Array<{
+    codigo: string; descricao: string; tipo: TipoRubrica; naturezaESocial: string;
+    incideINSS: boolean; incideFGTS: boolean; incideIRRF: boolean;
+    incide13: boolean; incideFerias: boolean; incideRescisao: boolean;
+  }> = [
     // PROVENTOS
-    { codigo: "0001", descricao: "Salário Base",           tipo: "PROVENTO",     naturezaESocial: "1000", incideINSS: true,  incideFGTS: true,  incideIRRF: true,  incide13: true,  incideFerias: true,  incideRescisao: true  },
-    { codigo: "0002", descricao: "Salário Proporcional",   tipo: "PROVENTO",     naturezaESocial: "1000", incideINSS: true,  incideFGTS: true,  incideIRRF: true,  incide13: true,  incideFerias: true,  incideRescisao: true  },
-    { codigo: "0010", descricao: "Hora Extra 50%",         tipo: "PROVENTO",     naturezaESocial: "1011", incideINSS: true,  incideFGTS: true,  incideIRRF: true,  incide13: true,  incideFerias: true,  incideRescisao: false },
-    { codigo: "0011", descricao: "Hora Extra 100%",        tipo: "PROVENTO",     naturezaESocial: "1012", incideINSS: true,  incideFGTS: true,  incideIRRF: true,  incide13: true,  incideFerias: true,  incideRescisao: false },
-    { codigo: "0020", descricao: "Adicional Noturno",      tipo: "PROVENTO",     naturezaESocial: "1010", incideINSS: true,  incideFGTS: true,  incideIRRF: true,  incide13: true,  incideFerias: true,  incideRescisao: false },
-    { codigo: "0030", descricao: "Adicional Insalubridade",tipo: "PROVENTO",     naturezaESocial: "1010", incideINSS: true,  incideFGTS: true,  incideIRRF: true,  incide13: true,  incideFerias: true,  incideRescisao: false },
-    { codigo: "0031", descricao: "Adicional Periculosidade",tipo:"PROVENTO",     naturezaESocial: "1010", incideINSS: true,  incideFGTS: true,  incideIRRF: true,  incide13: true,  incideFerias: true,  incideRescisao: false },
-    { codigo: "0040", descricao: "Comissões",              tipo: "PROVENTO",     naturezaESocial: "1040", incideINSS: true,  incideFGTS: true,  incideIRRF: true,  incide13: true,  incideFerias: true,  incideRescisao: false },
-    { codigo: "0050", descricao: "Adiantamento Salarial",  tipo: "PROVENTO",     naturezaESocial: "1799", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
-    { codigo: "0060", descricao: "PLR",                    tipo: "PROVENTO",     naturezaESocial: "1600", incideINSS: false, incideFGTS: false, incideIRRF: true,  incide13: false, incideFerias: false, incideRescisao: false },
-    { codigo: "0200", descricao: "Férias — Gozo",          tipo: "PROVENTO",     naturezaESocial: "1200", incideINSS: true,  incideFGTS: false, incideIRRF: true,  incide13: false, incideFerias: false, incideRescisao: false },
-    { codigo: "0201", descricao: "1/3 Constitucional Férias",tipo:"PROVENTO",   naturezaESocial: "1210", incideINSS: true,  incideFGTS: false, incideIRRF: true,  incide13: false, incideFerias: false, incideRescisao: false },
-    { codigo: "0202", descricao: "Abono Pecuniário",       tipo: "PROVENTO",     naturezaESocial: "1220", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
-    { codigo: "0300", descricao: "13º Salário 1ª Parcela", tipo: "PROVENTO",     naturezaESocial: "1100", incideINSS: false, incideFGTS: true,  incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
-    { codigo: "0301", descricao: "13º Salário 2ª Parcela", tipo: "PROVENTO",     naturezaESocial: "1110", incideINSS: true,  incideFGTS: true,  incideIRRF: true,  incide13: false, incideFerias: false, incideRescisao: false },
+    { codigo: "0001", descricao: "Salário Base",                  tipo: TipoRubrica.PROVENTO,    naturezaESocial: "1000", incideINSS: true,  incideFGTS: true,  incideIRRF: true,  incide13: true,  incideFerias: true,  incideRescisao: true  },
+    { codigo: "0002", descricao: "Salário Proporcional",          tipo: TipoRubrica.PROVENTO,    naturezaESocial: "1000", incideINSS: true,  incideFGTS: true,  incideIRRF: true,  incide13: true,  incideFerias: true,  incideRescisao: true  },
+    { codigo: "0010", descricao: "Hora Extra 50%",                tipo: TipoRubrica.PROVENTO,    naturezaESocial: "1011", incideINSS: true,  incideFGTS: true,  incideIRRF: true,  incide13: true,  incideFerias: true,  incideRescisao: false },
+    { codigo: "0011", descricao: "Hora Extra 100%",               tipo: TipoRubrica.PROVENTO,    naturezaESocial: "1012", incideINSS: true,  incideFGTS: true,  incideIRRF: true,  incide13: true,  incideFerias: true,  incideRescisao: false },
+    { codigo: "0020", descricao: "Adicional Noturno",             tipo: TipoRubrica.PROVENTO,    naturezaESocial: "1010", incideINSS: true,  incideFGTS: true,  incideIRRF: true,  incide13: true,  incideFerias: true,  incideRescisao: false },
+    { codigo: "0030", descricao: "Adicional Insalubridade",       tipo: TipoRubrica.PROVENTO,    naturezaESocial: "1010", incideINSS: true,  incideFGTS: true,  incideIRRF: true,  incide13: true,  incideFerias: true,  incideRescisao: false },
+    { codigo: "0031", descricao: "Adicional Periculosidade",      tipo: TipoRubrica.PROVENTO,    naturezaESocial: "1010", incideINSS: true,  incideFGTS: true,  incideIRRF: true,  incide13: true,  incideFerias: true,  incideRescisao: false },
+    { codigo: "0040", descricao: "Comissões",                     tipo: TipoRubrica.PROVENTO,    naturezaESocial: "1040", incideINSS: true,  incideFGTS: true,  incideIRRF: true,  incide13: true,  incideFerias: true,  incideRescisao: false },
+    { codigo: "0050", descricao: "Adiantamento Salarial",         tipo: TipoRubrica.PROVENTO,    naturezaESocial: "1799", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
+    { codigo: "0060", descricao: "PLR",                           tipo: TipoRubrica.PROVENTO,    naturezaESocial: "1600", incideINSS: false, incideFGTS: false, incideIRRF: true,  incide13: false, incideFerias: false, incideRescisao: false },
+    { codigo: "0200", descricao: "Férias — Gozo",                 tipo: TipoRubrica.PROVENTO,    naturezaESocial: "1200", incideINSS: true,  incideFGTS: false, incideIRRF: true,  incide13: false, incideFerias: false, incideRescisao: false },
+    { codigo: "0201", descricao: "1/3 Constitucional Férias",     tipo: TipoRubrica.PROVENTO,    naturezaESocial: "1210", incideINSS: true,  incideFGTS: false, incideIRRF: true,  incide13: false, incideFerias: false, incideRescisao: false },
+    { codigo: "0202", descricao: "Abono Pecuniário",              tipo: TipoRubrica.PROVENTO,    naturezaESocial: "1220", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
+    { codigo: "0300", descricao: "13º Salário 1ª Parcela",        tipo: TipoRubrica.PROVENTO,    naturezaESocial: "1100", incideINSS: false, incideFGTS: true,  incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
+    { codigo: "0301", descricao: "13º Salário 2ª Parcela",        tipo: TipoRubrica.PROVENTO,    naturezaESocial: "1110", incideINSS: true,  incideFGTS: true,  incideIRRF: true,  incide13: false, incideFerias: false, incideRescisao: false },
     // DESCONTOS
-    { codigo: "1000", descricao: "INSS — Empregado",       tipo: "DESCONTO",     naturezaESocial: "3000", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
-    { codigo: "1001", descricao: "IRRF",                   tipo: "DESCONTO",     naturezaESocial: "3500", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
-    { codigo: "1010", descricao: "Desconto Vale-Transporte",tipo:"DESCONTO",     naturezaESocial: "4000", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
-    { codigo: "1020", descricao: "Desconto Plano de Saúde",tipo: "DESCONTO",     naturezaESocial: "4010", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
-    { codigo: "1030", descricao: "Desconto Falta",         tipo: "DESCONTO",     naturezaESocial: "4099", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
-    { codigo: "1040", descricao: "Pensão Alimentícia",     tipo: "DESCONTO",     naturezaESocial: "4099", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
-    { codigo: "1050", descricao: "Adiantamento Salarial (desc.)",tipo:"DESCONTO",naturezaESocial: "4050", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
+    { codigo: "1000", descricao: "INSS — Empregado",              tipo: TipoRubrica.DESCONTO,    naturezaESocial: "3000", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
+    { codigo: "1001", descricao: "IRRF",                          tipo: TipoRubrica.DESCONTO,    naturezaESocial: "3500", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
+    { codigo: "1010", descricao: "Desconto Vale-Transporte",      tipo: TipoRubrica.DESCONTO,    naturezaESocial: "4000", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
+    { codigo: "1020", descricao: "Desconto Plano de Saúde",       tipo: TipoRubrica.DESCONTO,    naturezaESocial: "4010", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
+    { codigo: "1030", descricao: "Desconto Falta",                tipo: TipoRubrica.DESCONTO,    naturezaESocial: "4099", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
+    { codigo: "1040", descricao: "Pensão Alimentícia",            tipo: TipoRubrica.DESCONTO,    naturezaESocial: "4099", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
+    { codigo: "1050", descricao: "Adiantamento Salarial (desc.)", tipo: TipoRubrica.DESCONTO,    naturezaESocial: "4050", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
     // INFORMATIVOS
-    { codigo: "9001", descricao: "FGTS — Depósito Mensal", tipo: "INFORMATIVO",  naturezaESocial: "9001", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
-    { codigo: "9010", descricao: "Vale-Alimentação (PAT)", tipo: "INFORMATIVO",  naturezaESocial: "1811", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
-    { codigo: "9020", descricao: "Vale-Transporte Bruto",  tipo: "INFORMATIVO",  naturezaESocial: "1812", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
+    { codigo: "9001", descricao: "FGTS — Depósito Mensal",        tipo: TipoRubrica.INFORMATIVO, naturezaESocial: "9001", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
+    { codigo: "9010", descricao: "Vale-Alimentação (PAT)",         tipo: TipoRubrica.INFORMATIVO, naturezaESocial: "1811", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
+    { codigo: "9020", descricao: "Vale-Transporte Bruto",          tipo: TipoRubrica.INFORMATIVO, naturezaESocial: "1812", incideINSS: false, incideFGTS: false, incideIRRF: false, incide13: false, incideFerias: false, incideRescisao: false },
   ];
 
   for (const r of rubricasPadrao) {
