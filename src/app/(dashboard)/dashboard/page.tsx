@@ -28,9 +28,9 @@ export default async function DashboardPage() {
     db.empresa.count({ where: { escritorioId, ativa: true } }),
     db.ferias.count({
       where: {
-        funcionario: { empresa: { escritorioId } },
-        status: { in: ["PROGRAMADA", "PENDENTE"] },
-        dataInicio: { lte: em30dias },
+        empresa: { escritorioId },
+        status: { in: ["A_VENCER", "AGENDADA"] },
+        dataInicioGozo: { lte: em30dias },
       },
     }).catch(() => 0),
     db.eventoEsocial.count({
