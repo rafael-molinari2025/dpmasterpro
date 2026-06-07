@@ -33,17 +33,17 @@ export default function ConfiguracoesPage() {
             {
               icon: Bell, title: "Notificações",
               desc: "Configure alertas de vencimento de férias, guias e eSocial.",
-              color: "red", href: null,
+              color: "red", href: "/configuracoes/notificacoes",
             },
             {
               icon: Database, title: "Backup e Dados",
               desc: "Exportação de dados, backup periódico e retenção conforme LGPD.",
-              color: "slate", href: null,
+              color: "slate", href: "/configuracoes/backup",
             },
             {
               icon: CreditCard, title: "Plano e Faturamento",
               desc: "Gerencie seu plano, número de empresas e faturas.",
-              color: "indigo", href: null,
+              color: "indigo", href: "/configuracoes/plano",
             },
             {
               icon: Shield, title: "Segurança",

@@ -17,9 +17,10 @@ model Escritorio {
   email     String
   telefone  String?
   endereco  Json?
-  plano     Plano    @default(BASICO)
-  ativo     Boolean  @default(true)
-  createdAt DateTime @default(now())
+  plano          Plano    @default(BASICO)
+  configuracoes  Json?
+  ativo          Boolean  @default(true)
+  createdAt      DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   usuarios  Usuario[]
