@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Save, ArrowLeft, AlertCircle } from "lucide-react";
+import { Save, ArrowLeft, AlertCircle, RefreshCw } from "lucide-react";
 
 interface Empresa { id: string; nomeFantasia: string | null; razaoSocial: string; }
 interface Cargo { id: string; empresaId: string; descricao: string; codigo: string; salarioBase: number; }
@@ -24,9 +24,28 @@ export default function FormNovoFuncionario({ empresas, cargos, setores }: Props
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [empresaId, setEmpresaId] = useState(empresas[0]?.id ?? "");
+  const [matricula, setMatricula] = useState("");
+  const [buscandoMatricula, setBuscandoMatricula] = useState(false);
 
   const cargosFiltrados = cargos.filter((c) => c.empresaId === empresaId);
   const setoresFiltrados = setores.filter((s) => s.empresaId === empresaId);
+
+  const buscarProximaMatricula = useCallback(async (eId: string) => {
+    if (!eId) return;
+    setBuscandoMatricula(true);
+    try {
+      const res = await fetch(`/api/funcionarios/proxima-matricula?empresaId=${eId}`);
+      if (res.ok) {
+        const { proxima } = await res.json();
+        setMatricula(proxima);
+      }
+    } catch { /* silencioso */ }
+    finally { setBuscandoMatricula(false); }
+  }, []);
+
+  useEffect(() => {
+    buscarProximaMatricula(empresaId);
+  }, [empresaId, buscarProximaMatricula]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -39,7 +58,7 @@ export default function FormNovoFuncionario({ empresas, cargos, setores }: Props
 
     const body: Record<string, unknown> = {
       empresaId,
-      matricula: g("matricula"),
+      matricula: matricula.trim() || g("matricula"),
       nome: g("nome"),
       cpf: strip(g("cpf")),
       dataNascimento: new Date(g("dataNascimento")).toISOString(),
@@ -137,8 +156,30 @@ export default function FormNovoFuncionario({ empresas, cargos, setores }: Props
                 </select>
               </div>
               <div>
-                <label className={label}>Matrícula *</label>
-                <input type="text" name="matricula" required className={input} placeholder="Ex: 00001" />
+                <label className={label}>
+                  Matrícula *{" "}
+                  <span className="font-normal text-gray-400">(única por empresa)</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    name="matricula"
+                    required
+                    value={matricula}
+                    onChange={(e) => setMatricula(e.target.value)}
+                    className={`${input} pr-8 font-mono`}
+                    placeholder="00001"
+                  />
+                  <button
+                    type="button"
+                    title="Sugerir próxima matrícula"
+                    onClick={() => buscarProximaMatricula(empresaId)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${buscandoMatricula ? "animate-spin" : ""}`} />
+                  </button>
+                </div>
+                <p className="text-xs text-gray-400 mt-0.5">Preenchida automaticamente com o próximo número disponível</p>
               </div>
               <div>
                 <label className={label}>Tipo de Contrato *</label>
