@@ -1,25 +1,85 @@
+import { auth } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { redirect } from "next/navigation";
 import Header from "@/components/layout/Header";
-import { Play, Lock, Send, Download, Plus, ChevronDown, AlertCircle } from "lucide-react";
+import { Play, Lock, Send, Download, Plus, AlertCircle, CheckCircle, Clock } from "lucide-react";
 
-export default function FolhaPage() {
-  const competencia = "2026-06";
-  const label = "Junho/2026";
+function fmt(v: number) {
+  return v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
+  EM_CALCULO: { label: "Em Cálculo", color: "text-blue-700 bg-blue-50", icon: Clock },
+  ABERTA: { label: "Aberta", color: "text-amber-700 bg-amber-50", icon: Clock },
+  FECHADA: { label: "Fechada", color: "text-green-700 bg-green-50", icon: CheckCircle },
+};
+
+export default async function FolhaPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ competencia?: string; empresaId?: string }>;
+}) {
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+  const escritorioId = (session.user as any).escritorioId as string;
+
+  const hoje = new Date();
+  const { competencia: compParam, empresaId } = await searchParams;
+  const competencia = compParam ?? `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}`;
+
+  const [folhas, empresas] = await Promise.all([
+    db.folha.findMany({
+      where: {
+        empresa: { escritorioId },
+        competencia,
+        ...(empresaId && { empresaId }),
+      },
+      include: { empresa: { select: { razaoSocial: true, nomeFantasia: true } } },
+      orderBy: { createdAt: "desc" },
+    }),
+    db.empresa.findMany({
+      where: { escritorioId, ativa: true },
+      select: { id: true, nomeFantasia: true, razaoSocial: true },
+      orderBy: { razaoSocial: "asc" },
+    }),
+  ]);
+
+  const totalProventos = folhas.reduce((s, f) => s + parseFloat(f.totalProventos.toString()), 0);
+  const totalDescontos = folhas.reduce((s, f) => s + parseFloat(f.totalDescontos.toString()), 0);
+  const totalLiquido = folhas.reduce((s, f) => s + parseFloat(f.totalLiquido.toString()), 0);
+  const totalINSSEmpregado = folhas.reduce((s, f) => s + parseFloat(f.totalINSSEmpregado.toString()), 0);
+  const totalINSSPatronal = folhas.reduce((s, f) => s + parseFloat(f.totalINSSPatronal.toString()), 0);
+  const totalFGTS = folhas.reduce((s, f) => s + parseFloat(f.totalFGTS.toString()), 0);
+
+  const [ano, mes] = competencia.split("-").map(Number);
+  const label = new Date(ano, mes - 1).toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+  const labelCap = label.charAt(0).toUpperCase() + label.slice(1);
 
   return (
     <>
-      <Header title="Folha de Pagamento" subtitle={`Competência: ${label}`} />
+      <Header title="Folha de Pagamento" subtitle={`Competência: ${labelCap}`} />
       <div className="flex-1 p-6 space-y-6">
 
-        {/* Competência Selector + Actions */}
-        <div className="flex items-center justify-between">
+        <form method="GET" className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
-              {label}
-              <ChevronDown className="w-4 h-4" />
-            </button>
-            <button className="flex items-center gap-2 px-3 py-2 border border-gray-200 bg-white rounded-lg text-sm text-gray-600 hover:bg-gray-50">
-              Normal
-              <ChevronDown className="w-3 h-3" />
+            <input
+              type="month"
+              name="competencia"
+              defaultValue={competencia}
+              className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <select
+              name="empresaId"
+              defaultValue={empresaId ?? ""}
+              className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Todas as empresas</option>
+              {empresas.map((e) => (
+                <option key={e.id} value={e.id}>{e.nomeFantasia ?? e.razaoSocial}</option>
+              ))}
+            </select>
+            <button type="submit" className="px-3 py-2 border border-gray-200 bg-white rounded-lg text-sm text-gray-600 hover:bg-gray-50">
+              Filtrar
             </button>
           </div>
           <div className="flex items-center gap-2">
@@ -27,27 +87,21 @@ export default function FolhaPage() {
               <Download className="w-4 h-4" />
               Exportar
             </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-lg text-sm hover:bg-amber-600 transition-colors">
-              <Lock className="w-4 h-4" />
-              Fechar Folha
-            </button>
             <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition-colors">
               <Play className="w-4 h-4" />
               Processar Folha
             </button>
           </div>
-        </div>
+        </form>
 
-        {/* Status Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-7 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-6 gap-3">
           {[
-            { label: "Funcionários", value: "0" },
-            { label: "Total Proventos", value: "R$ 0,00" },
-            { label: "Total Descontos", value: "R$ 0,00" },
-            { label: "Total Líquido", value: "R$ 0,00" },
-            { label: "INSS Empregado", value: "R$ 0,00" },
-            { label: "INSS Patronal", value: "R$ 0,00" },
-            { label: "FGTS", value: "R$ 0,00" },
+            { label: "Empresas", value: String(folhas.length) },
+            { label: "Total Proventos", value: `R$ ${fmt(totalProventos)}` },
+            { label: "Total Descontos", value: `R$ ${fmt(totalDescontos)}` },
+            { label: "Total Líquido", value: `R$ ${fmt(totalLiquido)}` },
+            { label: "INSS Total", value: `R$ ${fmt(totalINSSEmpregado + totalINSSPatronal)}` },
+            { label: "FGTS", value: `R$ ${fmt(totalFGTS)}` },
           ].map((s) => (
             <div key={s.label} className="bg-white rounded-lg border border-gray-200 px-3 py-3">
               <p className="text-[11px] text-gray-500">{s.label}</p>
@@ -56,48 +110,86 @@ export default function FolhaPage() {
           ))}
         </div>
 
-        {/* Main Table */}
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between">
-            <h2 className="font-semibold text-gray-900 text-sm">Contracheques — {label}</h2>
+            <h2 className="font-semibold text-gray-900 text-sm">Folhas — {labelCap}</h2>
             <button className="flex items-center gap-1.5 text-xs text-blue-600 hover:underline">
               <Plus className="w-3 h-3" />
               Lançamento Manual
             </button>
           </div>
 
-          {/* Empty state */}
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-              <AlertCircle className="w-8 h-8 text-gray-400" />
-            </div>
-            <h3 className="font-medium text-gray-700 mb-1">Nenhum funcionário na folha</h3>
-            <p className="text-sm text-gray-500 max-w-sm">
-              Selecione uma empresa e clique em "Processar Folha" para calcular automaticamente
-              todos os proventos e descontos conforme a legislação vigente.
-            </p>
-            <button className="mt-4 flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors">
-              <Play className="w-4 h-4" />
-              Processar Folha
-            </button>
-          </div>
-        </div>
-
-        {/* Info Panel */}
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <h3 className="font-semibold text-gray-900 mb-3 text-sm">Lançamentos Manuais Permitidos</h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {[
-              "Horas Extras", "Comissões", "Adicional Noturno",
-              "Desconto de Falta", "Vale-Alimentação", "Adiantamento",
-              "Pensão Alimentícia", "Outros Proventos", "Outros Descontos",
-            ].map((item) => (
-              <div key={item} className="flex items-center gap-2 text-sm text-gray-600">
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0" />
-                {item}
+          {folhas.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                <AlertCircle className="w-8 h-8 text-gray-400" />
               </div>
-            ))}
-          </div>
+              <h3 className="font-medium text-gray-700 mb-1">Nenhuma folha processada</h3>
+              <p className="text-sm text-gray-500 max-w-sm">
+                Clique em "Processar Folha" para calcular proventos e descontos de {labelCap}.
+              </p>
+              <button className="mt-4 flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors">
+                <Play className="w-4 h-4" />
+                Processar Folha
+              </button>
+            </div>
+          ) : (
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Empresa</th>
+                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Tipo</th>
+                  <th className="text-right px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Proventos</th>
+                  <th className="text-right px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Descontos</th>
+                  <th className="text-right px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Líquido</th>
+                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Status</th>
+                  <th className="px-5 py-3">
+                    <button className="flex items-center gap-1.5 text-xs text-amber-600 hover:underline ml-auto">
+                      <Lock className="w-3 h-3" />
+                      Fechar Folha
+                    </button>
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {folhas.map((f) => {
+                  const s = statusConfig[f.status] ?? statusConfig["ABERTA"];
+                  const StatusIcon = s.icon;
+                  return (
+                    <tr key={f.id} className="hover:bg-gray-50">
+                      <td className="px-5 py-4 text-sm text-gray-900 font-medium">
+                        {f.empresa.nomeFantasia ?? f.empresa.razaoSocial}
+                      </td>
+                      <td className="px-5 py-4">
+                        <span className="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-700">{f.tipo}</span>
+                      </td>
+                      <td className="px-5 py-4 text-sm text-right text-gray-900">
+                        R$ {fmt(parseFloat(f.totalProventos.toString()))}
+                      </td>
+                      <td className="px-5 py-4 text-sm text-right text-red-700">
+                        R$ {fmt(parseFloat(f.totalDescontos.toString()))}
+                      </td>
+                      <td className="px-5 py-4 text-sm text-right font-bold text-gray-900">
+                        R$ {fmt(parseFloat(f.totalLiquido.toString()))}
+                      </td>
+                      <td className="px-5 py-4">
+                        <span className={`flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-full w-fit ${s.color}`}>
+                          <StatusIcon className="w-3 h-3" />
+                          {s.label}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4">
+                        <button className="flex items-center gap-1.5 text-xs text-blue-600 hover:underline">
+                          <Send className="w-3 h-3" />
+                          eSocial
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
         </div>
 
       </div>

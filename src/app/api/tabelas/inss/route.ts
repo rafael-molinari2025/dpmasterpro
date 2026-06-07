@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireAuth } from "@/lib/auth-guard";
 
 export async function GET() {
   try {
-    const tabelas = await db.tabelaINSS.findMany({
-      orderBy: { ano: "desc" },
-    });
+    const tabelas = await db.tabelaINSS.findMany({ orderBy: { ano: "desc" } });
     return NextResponse.json(tabelas);
   } catch {
     return NextResponse.json({ error: "Erro ao buscar tabelas" }, { status: 500 });
@@ -13,6 +12,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const guard = await requireAuth();
+  if (!guard.ok) return guard.response;
+
   try {
     const body = await request.json();
     const tabela = await db.tabelaINSS.create({ data: body });

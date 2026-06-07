@@ -1,18 +1,22 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireAuth } from "@/lib/auth-guard";
 
 export async function POST(request: Request) {
+  const guard = await requireAuth();
+  if (!guard.ok) return guard.response;
+  const { escritorioId } = guard.session;
+
   try {
     const { empresaId, folhaId, competencia } = await request.json();
 
-    const folha = await db.folha.findUnique({ where: { id: folhaId } });
-    if (!folha) {
-      return NextResponse.json({ error: "Folha não encontrada" }, { status: 404 });
-    }
+    const empresa = await db.empresa.findFirst({ where: { id: empresaId, escritorioId } });
+    if (!empresa) return NextResponse.json({ error: "Empresa não encontrada" }, { status: 404 });
+
+    const folha = await db.folha.findFirst({ where: { id: folhaId, empresaId } });
+    if (!folha) return NextResponse.json({ error: "Folha não encontrada" }, { status: 404 });
 
     const [ano, mes] = competencia.split("-").map(Number);
-
-    // Data de vencimento GPS/DARF: dia 20 do mês seguinte
     const mesVencimento = mes === 12 ? 1 : mes + 1;
     const anoVencimento = mes === 12 ? ano + 1 : ano;
 
@@ -21,78 +25,35 @@ export async function POST(request: Request) {
     const vencimentoDCTF = new Date(anoVencimento, mesVencimento - 1, 15);
 
     const guiasCriadas = [];
-
-    const totalINSS = parseFloat(folha.totalINSSEmpregado.toString()) +
-                      parseFloat(folha.totalINSSPatronal.toString());
+    const totalINSS = parseFloat(folha.totalINSSEmpregado.toString()) + parseFloat(folha.totalINSSPatronal.toString());
     const totalIRRF = parseFloat(folha.totalIRRF.toString());
     const totalFGTS = parseFloat(folha.totalFGTS.toString());
 
-    // GPS — INSS
     if (totalINSS > 0) {
-      const gps = await db.guiaPagamento.create({
-        data: {
-          empresaId,
-          folhaId,
-          tipo: "GPS_INSS",
-          competencia,
-          dataVencimento: vencimentoGPS,
-          valorPrincipal: totalINSS,
-          valorTotal: totalINSS,
-          status: "PENDENTE",
-        },
-      });
-      guiasCriadas.push(gps);
+      guiasCriadas.push(await db.guiaPagamento.create({
+        data: { empresaId, folhaId, tipo: "GPS_INSS", competencia, dataVencimento: vencimentoGPS, valorPrincipal: totalINSS, valorTotal: totalINSS, status: "PENDENTE" },
+      }));
     }
 
-    // DARF — IRRF
     if (totalIRRF > 0) {
-      const darf = await db.guiaPagamento.create({
-        data: {
-          empresaId,
-          folhaId,
-          tipo: "DARF_IRRF",
-          competencia,
-          dataVencimento: vencimentoGPS,
-          valorPrincipal: totalIRRF,
-          valorTotal: totalIRRF,
-          status: "PENDENTE",
-        },
-      });
-      guiasCriadas.push(darf);
+      guiasCriadas.push(await db.guiaPagamento.create({
+        data: { empresaId, folhaId, tipo: "DARF_IRRF", competencia, dataVencimento: vencimentoGPS, valorPrincipal: totalIRRF, valorTotal: totalIRRF, status: "PENDENTE" },
+      }));
     }
 
-    // FGTS Digital
     if (totalFGTS > 0) {
-      const fgts = await db.guiaPagamento.create({
+      guiasCriadas.push(await db.guiaPagamento.create({
         data: {
-          empresaId,
-          folhaId,
-          tipo: "FGTS_DIGITAL",
-          competencia,
-          dataVencimento: vencimentoFGTS,
-          valorPrincipal: totalFGTS,
-          valorTotal: totalFGTS,
-          pixCopiaCola: `00020126330014br.gov.fgts.pix0111${empresaId.slice(0,11)}5204000053039865406${totalFGTS.toFixed(2).replace(".", "")}5802BR5920FGTS Digital${competencia}6009SAO PAULO62070503***6304`,
+          empresaId, folhaId, tipo: "FGTS_DIGITAL", competencia, dataVencimento: vencimentoFGTS, valorPrincipal: totalFGTS, valorTotal: totalFGTS,
+          pixCopiaCola: `00020126330014br.gov.fgts.pix0111${empresaId.slice(0, 11)}5204000053039865406${totalFGTS.toFixed(2).replace(".", "")}5802BR5920FGTS Digital${competencia}6009SAO PAULO62070503***6304`,
           status: "PENDENTE",
         },
-      });
-      guiasCriadas.push(fgts);
+      }));
     }
 
-    // DCTFWeb
-    const dctf = await db.guiaPagamento.create({
-      data: {
-        empresaId,
-        folhaId,
-        tipo: "DCTFWEB",
-        competencia,
-        dataVencimento: vencimentoDCTF,
-        valorPrincipal: totalINSS + totalIRRF,
-        valorTotal: totalINSS + totalIRRF,
-        status: "PENDENTE",
-      },
-    });
-    guiasCriadas.push(dctf);
+    guiasCriadas.push(await db.guiaPagamento.create({
+      data: { empresaId, folhaId, tipo: "DCTFWEB", competencia, dataVencimento: vencimentoDCTF, valorPrincipal: totalINSS + totalIRRF, valorTotal: totalINSS + totalIRRF, status: "PENDENTE" },
+    }));
 
     return NextResponse.json({
       guias: guiasCriadas,

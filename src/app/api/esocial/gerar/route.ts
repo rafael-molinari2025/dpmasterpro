@@ -1,18 +1,23 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireAuth } from "@/lib/auth-guard";
 import { gerarS1010, gerarS1200, gerarS2200, gerarS1299 } from "@/lib/esocial";
 import type { EmpresaESocial } from "@/lib/esocial";
 
 const AMBIENTE = (process.env.ESOCIAL_AMBIENTE ?? "2") as "1" | "2";
 
 export async function POST(request: Request) {
+  const guard = await requireAuth();
+  if (!guard.ok) return guard.response;
+  const { escritorioId } = guard.session;
+
   try {
     const { empresaId, tipoEvento, referencia } = await request.json();
 
-    const empresa = await db.empresa.findUnique({ where: { id: empresaId } });
-    if (!empresa) {
-      return NextResponse.json({ error: "Empresa não encontrada" }, { status: 404 });
-    }
+    const empresa = await db.empresa.findFirst({
+      where: { id: empresaId, escritorioId },
+    });
+    if (!empresa) return NextResponse.json({ error: "Empresa não encontrada" }, { status: 404 });
 
     const empDados: EmpresaESocial = {
       cnpj: empresa.cnpj,
@@ -40,13 +45,11 @@ export async function POST(request: Request) {
       }
 
       case "S-2200": {
-        const funcionario = await db.funcionario.findUnique({
-          where: { id: referencia },
+        const funcionario = await db.funcionario.findFirst({
+          where: { id: referencia, empresa: { escritorioId } },
           include: { cargo: true },
         });
-        if (!funcionario) {
-          return NextResponse.json({ error: "Funcionário não encontrado" }, { status: 404 });
-        }
+        if (!funcionario) return NextResponse.json({ error: "Funcionário não encontrado" }, { status: 404 });
         xmlGerado = gerarS2200(empDados, {
           cpf: funcionario.cpf,
           nome: funcionario.nome,
@@ -65,26 +68,14 @@ export async function POST(request: Request) {
       }
 
       case "S-1200": {
-        const folha = await db.folha.findUnique({
-          where: { id: referencia },
-          include: {
-            itens: {
-              include: {
-                funcionario: true,
-                rubrica: true,
-              },
-            },
-          },
+        const folha = await db.folha.findFirst({
+          where: { id: referencia, empresa: { escritorioId } },
+          include: { itens: { include: { funcionario: true, rubrica: true } } },
         });
-        if (!folha) {
-          return NextResponse.json({ error: "Folha não encontrada" }, { status: 404 });
-        }
-        // Gera um S-1200 por funcionário (simplificado - primeiro funcionário)
+        if (!folha) return NextResponse.json({ error: "Folha não encontrada" }, { status: 404 });
         const primeiroFuncionario = folha.itens[0]?.funcionario;
         if (primeiroFuncionario) {
-          const itensFuncionario = folha.itens.filter(
-            (i) => i.funcionarioId === primeiroFuncionario.id
-          );
+          const itensFuncionario = folha.itens.filter((i) => i.funcionarioId === primeiroFuncionario.id);
           xmlGerado = gerarS1200(empDados, {
             competencia: folha.competencia,
             funcionario: {
@@ -109,7 +100,6 @@ export async function POST(request: Request) {
       }
 
       case "S-1299": {
-        const { competencia } = request as any;
         xmlGerado = gerarS1299(empDados, referencia);
         break;
       }
@@ -118,7 +108,6 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: `Evento ${tipoEvento} não suportado nesta versão` }, { status: 400 });
     }
 
-    // Salva o evento gerado
     const evento = await db.eventoEsocial.create({
       data: {
         empresaId,
@@ -130,10 +119,7 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json({
-      evento,
-      xml: xmlGerado,
-    });
+    return NextResponse.json({ evento, xml: xmlGerado });
   } catch (error) {
     console.error("Erro ao gerar evento eSocial:", error);
     return NextResponse.json({ error: "Erro ao gerar evento" }, { status: 500 });

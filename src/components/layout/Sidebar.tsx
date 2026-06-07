@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
 import {
   LayoutDashboard, Building2, Users, FileText, BookOpen,
   Calculator, Umbrella, UserMinus, Send, Receipt, BarChart3,
@@ -12,20 +13,10 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "Empresas", href: "/empresas", icon: Building2 },
   {
-    label: "Dashboard",
-    href: "/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    label: "Empresas",
-    href: "/empresas",
-    icon: Building2,
-  },
-  {
-    label: "Funcionários",
-    href: "/funcionarios",
-    icon: Users,
+    label: "Funcionários", href: "/funcionarios", icon: Users,
     children: [
       { label: "Cadastro", href: "/funcionarios" },
       { label: "Cargos", href: "/funcionarios/cargos" },
@@ -33,38 +24,24 @@ const navItems = [
     ],
   },
   {
-    label: "Folha de Pagamento",
-    href: "/folha",
-    icon: Calculator,
+    label: "Folha de Pagamento", href: "/folha", icon: Calculator,
     children: [
       { label: "Processar Folha", href: "/folha" },
       { label: "13º Salário", href: "/folha/decimo-terceiro" },
       { label: "Adiantamento", href: "/folha/adiantamento" },
     ],
   },
+  { label: "Férias", href: "/ferias", icon: Umbrella },
+  { label: "Rescisão", href: "/rescisao", icon: UserMinus },
   {
-    label: "Férias",
-    href: "/ferias",
-    icon: Umbrella,
-  },
-  {
-    label: "Rescisão",
-    href: "/rescisao",
-    icon: UserMinus,
-  },
-  {
-    label: "Rubricas",
-    href: "/rubricas",
-    icon: BookOpen,
+    label: "Rubricas", href: "/rubricas", icon: BookOpen,
     children: [
       { label: "Configurar Rubricas", href: "/rubricas" },
       { label: "Eventos eSocial", href: "/rubricas/eventos" },
     ],
   },
   {
-    label: "Tabelas Legais",
-    href: "/tabelas",
-    icon: FileText,
+    label: "Tabelas Legais", href: "/tabelas", icon: FileText,
     children: [
       { label: "INSS", href: "/tabelas/inss" },
       { label: "IRRF", href: "/tabelas/irrf" },
@@ -73,9 +50,7 @@ const navItems = [
     ],
   },
   {
-    label: "eSocial",
-    href: "/esocial",
-    icon: Send,
+    label: "eSocial", href: "/esocial", icon: Send,
     children: [
       { label: "Eventos Pendentes", href: "/esocial" },
       { label: "Histórico de Envios", href: "/esocial/historico" },
@@ -83,9 +58,7 @@ const navItems = [
     ],
   },
   {
-    label: "Guias de Pagamento",
-    href: "/guias",
-    icon: Receipt,
+    label: "Guias de Pagamento", href: "/guias", icon: Receipt,
     children: [
       { label: "GPS / INSS", href: "/guias/gps" },
       { label: "DARF / IRRF", href: "/guias/darf" },
@@ -94,9 +67,7 @@ const navItems = [
     ],
   },
   {
-    label: "Relatórios",
-    href: "/relatorios",
-    icon: BarChart3,
+    label: "Relatórios", href: "/relatorios", icon: BarChart3,
     children: [
       { label: "Holerite", href: "/relatorios/holerite" },
       { label: "Resumo da Folha", href: "/relatorios/resumo" },
@@ -105,26 +76,25 @@ const navItems = [
       { label: "Informe de Rendimentos", href: "/relatorios/informe" },
     ],
   },
-  {
-    label: "LGPD",
-    href: "/lgpd",
-    icon: Shield,
-  },
-  {
-    label: "Importação",
-    href: "/importacao",
-    icon: Upload,
-  },
-  {
-    label: "Configurações",
-    href: "/configuracoes",
-    icon: Settings,
-  },
+  { label: "LGPD", href: "/lgpd", icon: Shield },
+  { label: "Importação", href: "/importacao", icon: Upload },
+  { label: "Configurações", href: "/configuracoes", icon: Settings },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
   const [expanded, setExpanded] = useState<string[]>([]);
+  const { data: session } = useSession();
+
+  const userName = session?.user?.name ?? "Usuário";
+  const userEmail = session?.user?.email ?? "—";
+  const userInitials = userName
+    .split(" ")
+    .filter(Boolean)
+    .map((n: string) => n[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
   function toggleExpand(label: string) {
     setExpanded((prev) =>
@@ -144,7 +114,7 @@ export default function Sidebar() {
           <Banknote className="w-5 h-5 text-white" />
         </div>
         <div>
-          <p className="text-white font-bold text-sm leading-tight">SYS-DP</p>
+          <p className="text-white font-bold text-sm leading-tight">DP Master Pro</p>
           <p className="text-slate-400 text-[11px]">Departamento Pessoal</p>
         </div>
       </div>
@@ -173,11 +143,7 @@ export default function Sidebar() {
                     >
                       <Icon className="w-4 h-4 flex-shrink-0" />
                       <span className="flex-1 text-left">{item.label}</span>
-                      {open ? (
-                        <ChevronDown className="w-3 h-3" />
-                      ) : (
-                        <ChevronRight className="w-3 h-3" />
-                      )}
+                      {open ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
                     </button>
                     {open && (
                       <ul className="mt-0.5 ml-4 pl-3 border-l border-slate-700 space-y-0.5">
@@ -223,13 +189,17 @@ export default function Sidebar() {
       <div className="p-3 border-t border-slate-700">
         <div className="flex items-center gap-3 px-2 py-2">
           <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-            US
+            {userInitials || "US"}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-white text-xs font-medium truncate">Usuário</p>
-            <p className="text-slate-400 text-[11px] truncate">escritorio@exemplo.com.br</p>
+            <p className="text-white text-xs font-medium truncate">{userName}</p>
+            <p className="text-slate-400 text-[11px] truncate">{userEmail}</p>
           </div>
-          <button className="text-slate-400 hover:text-white transition-colors">
+          <button
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            title="Sair do sistema"
+            className="text-slate-400 hover:text-white transition-colors"
+          >
             <LogOut className="w-4 h-4" />
           </button>
         </div>
