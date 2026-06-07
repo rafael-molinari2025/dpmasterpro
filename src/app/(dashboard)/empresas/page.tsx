@@ -2,7 +2,8 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 import Header from "@/components/layout/Header";
-import { Building2, Plus, Search, CheckCircle, XCircle } from "lucide-react";
+import { Building2, Plus, Search, CheckCircle, XCircle, Settings } from "lucide-react";
+import Link from "next/link";
 
 export default async function EmpresasPage({
   searchParams,
@@ -90,6 +91,7 @@ export default async function EmpresasPage({
                     <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Regime</th>
                     <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Funcionários</th>
                     <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Status</th>
+                    <th className="px-5 py-3"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -128,6 +130,15 @@ export default async function EmpresasPage({
                             <XCircle className="w-3 h-3" /> Inativa
                           </span>
                         )}
+                      </td>
+                      <td className="px-5 py-4">
+                        <Link
+                          href={`/empresas/${e.id}`}
+                          className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-blue-600 px-2 py-1 rounded hover:bg-blue-50 transition-colors"
+                        >
+                          <Settings className="w-3.5 h-3.5" />
+                          Editar
+                        </Link>
                       </td>
                     </tr>
                   ))}
