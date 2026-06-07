@@ -12,7 +12,7 @@ export default function Header({ title, subtitle }: HeaderProps) {
   const [empresa, setEmpresa] = useState("Empresa Exemplo Ltda");
 
   return (
-    <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 flex-shrink-0">
+    <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 flex-shrink-0 print:hidden">
       {/* Title */}
       <div>
         <h1 className="text-lg font-semibold text-gray-900">{title}</h1>

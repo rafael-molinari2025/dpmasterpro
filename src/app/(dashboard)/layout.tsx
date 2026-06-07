@@ -9,7 +9,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className="flex h-full min-h-screen">
       <Sidebar />
-      <main className="flex-1 ml-[260px] flex flex-col min-h-screen">
+      <main className="flex-1 ml-[260px] print:ml-0 flex flex-col min-h-screen">
         {children}
       </main>
     </div>

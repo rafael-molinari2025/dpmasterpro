@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Building2, Users, FileText, BookOpen,
   Calculator, Umbrella, UserMinus, Send, Receipt, BarChart3,
   Shield, Upload, Settings, ChevronDown, ChevronRight, LogOut,
-  Banknote,
+  Banknote, BookMarked,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -89,6 +89,7 @@ const navItems: NavItem[] = [
   },
   { label: "LGPD",              href: "/lgpd",         icon: Shield,          modulo: "lgpd" },
   { label: "Importação",        href: "/importacao",   icon: Upload,          modulo: "importacao" },
+  { label: "Manual",            href: "/manual",       icon: BookMarked },
   { label: "Configurações",     href: "/configuracoes", icon: Settings,       adminOnly: true },
 ];
 
@@ -131,7 +132,7 @@ export default function Sidebar() {
   const itensFiltrados = navItems.filter(podeVer);
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-[260px] bg-slate-900 flex flex-col z-30">
+    <aside className="fixed left-0 top-0 h-full w-[260px] bg-slate-900 flex flex-col z-30 print:hidden">
       {/* Logo */}
       <div className="flex items-center gap-3 px-5 py-5 border-b border-slate-700">
         <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0">
