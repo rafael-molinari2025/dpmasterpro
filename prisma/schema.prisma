@@ -35,6 +35,7 @@ model Usuario {
   email        String    @unique
   senha        String
   perfil       Perfil    @default(OPERADOR)
+  permissoes   Json      @default("[]")
   ativo        Boolean   @default(true)
   mfaSecret    String?
   mfaAtivo     Boolean   @default(false)

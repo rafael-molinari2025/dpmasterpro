@@ -1,5 +1,6 @@
 import Header from "@/components/layout/Header";
 import { Building2, Users, Shield, Bell, Database, Key, Globe, CreditCard } from "lucide-react";
+import Link from "next/link";
 
 export default function ConfiguracoesPage() {
   return (
@@ -12,42 +13,42 @@ export default function ConfiguracoesPage() {
             {
               icon: Building2, title: "Dados do Escritório",
               desc: "CNPJ, razão social, endereço, contato e logotipo.",
-              color: "blue",
+              color: "blue", href: null,
             },
             {
               icon: Users, title: "Usuários e Perfis",
-              desc: "Gerencie usuários, perfis de acesso (Admin, Gerente, Operador) e MFA.",
-              color: "purple",
+              desc: "Gerencie usuários, perfis de acesso (Administrador ou Usuário) e permissões por módulo.",
+              color: "purple", href: "/configuracoes/usuarios",
             },
             {
               icon: Key, title: "Certificado Digital",
               desc: "Importe e gerencie o certificado A1/A3 para assinatura do eSocial.",
-              color: "amber",
+              color: "amber", href: null,
             },
             {
               icon: Globe, title: "eSocial — Ambiente",
               desc: "Alterne entre Homologação e Produção. Credenciais e proxy.",
-              color: "green",
+              color: "green", href: null,
             },
             {
               icon: Bell, title: "Notificações",
               desc: "Configure alertas de vencimento de férias, guias e eSocial.",
-              color: "red",
+              color: "red", href: null,
             },
             {
               icon: Database, title: "Backup e Dados",
               desc: "Exportação de dados, backup periódico e retenção conforme LGPD.",
-              color: "slate",
+              color: "slate", href: null,
             },
             {
               icon: CreditCard, title: "Plano e Faturamento",
               desc: "Gerencie seu plano, número de empresas e faturas.",
-              color: "indigo",
+              color: "indigo", href: null,
             },
             {
               icon: Shield, title: "Segurança",
               desc: "Políticas de senha, sessão, 2FA e log de acessos.",
-              color: "rose",
+              color: "rose", href: null,
             },
           ].map((card) => {
             const Icon = card.icon;
@@ -62,6 +63,11 @@ export default function ConfiguracoesPage() {
               rose: { icon: "bg-rose-50 text-rose-600", btn: "bg-rose-600 hover:bg-rose-700" },
             };
             const c = colors[card.color];
+            const btnContent = (
+              <span className={`mt-4 w-full text-white text-sm py-2 rounded-lg transition-colors text-center block ${c.btn}`}>
+                Configurar
+              </span>
+            );
             return (
               <div key={card.title} className="bg-white rounded-xl border border-gray-200 p-5 flex flex-col">
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-3 ${c.icon}`}>
@@ -69,9 +75,13 @@ export default function ConfiguracoesPage() {
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-1">{card.title}</h3>
                 <p className="text-sm text-gray-500 flex-1">{card.desc}</p>
-                <button className={`mt-4 w-full text-white text-sm py-2 rounded-lg transition-colors ${c.btn}`}>
-                  Configurar
-                </button>
+                {card.href ? (
+                  <Link href={card.href}>{btnContent}</Link>
+                ) : (
+                  <button className={`mt-4 w-full text-white text-sm py-2 rounded-lg transition-colors ${c.btn}`}>
+                    Configurar
+                  </button>
+                )}
               </div>
             );
           })}

@@ -6,6 +6,8 @@ export type GuardedSession = {
   escritorioId: string;
   email: string;
   name: string;
+  perfil: string;
+  permissoes: string[];
 };
 
 type GuardOk = { ok: true; session: GuardedSession };
@@ -14,7 +16,8 @@ export type GuardResult = GuardOk | GuardFail;
 
 export async function requireAuth(): Promise<GuardResult> {
   const session = await auth();
-  const escritorioId = (session?.user as any)?.escritorioId as string | undefined;
+  const user = session?.user as any;
+  const escritorioId = user?.escritorioId as string | undefined;
 
   if (!session?.user?.id || !escritorioId) {
     return {
@@ -30,6 +33,25 @@ export async function requireAuth(): Promise<GuardResult> {
       escritorioId,
       email: session.user.email ?? "",
       name: session.user.name ?? "",
+      perfil: user.perfil ?? "OPERADOR",
+      permissoes: Array.isArray(user.permissoes) ? user.permissoes : [],
     },
   };
+}
+
+export async function requireAdmin(): Promise<GuardResult> {
+  const result = await requireAuth();
+  if (!result.ok) return result;
+
+  if (result.session.perfil !== "ADMIN") {
+    return {
+      ok: false,
+      response: NextResponse.json(
+        { error: "Acesso negado. Apenas administradores." },
+        { status: 403 }
+      ),
+    };
+  }
+
+  return result;
 }
