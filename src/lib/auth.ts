@@ -12,33 +12,38 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         senha: { label: "Senha", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.senha) return null;
+        try {
+          if (!credentials?.email || !credentials?.senha) return null;
 
-        const usuario = await db.usuario.findUnique({
-          where: { email: credentials.email as string },
-          include: { escritorio: true },
-        });
+          const usuario = await db.usuario.findUnique({
+            where: { email: credentials.email as string },
+          });
 
-        if (!usuario || !usuario.ativo) return null;
+          if (!usuario || !usuario.ativo) return null;
 
-        const senhaValida = await bcrypt.compare(
-          credentials.senha as string,
-          usuario.senha
-        );
-        if (!senhaValida) return null;
+          const senhaValida = await bcrypt.compare(
+            credentials.senha as string,
+            usuario.senha
+          );
+          if (!senhaValida) return null;
 
-        await db.usuario.update({
-          where: { id: usuario.id },
-          data: { ultimoAcesso: new Date() },
-        });
+          // atualiza último acesso em background sem bloquear o login
+          db.usuario.update({
+            where: { id: usuario.id },
+            data: { ultimoAcesso: new Date() },
+          }).catch(() => {});
 
-        return {
-          id: usuario.id,
-          email: usuario.email,
-          name: usuario.nome,
-          escritorioId: usuario.escritorioId,
-          perfil: usuario.perfil,
-        };
+          return {
+            id: usuario.id,
+            email: usuario.email,
+            name: usuario.nome,
+            escritorioId: usuario.escritorioId,
+            perfil: usuario.perfil,
+          };
+        } catch (err) {
+          console.error("[auth] authorize error:", err);
+          return null;
+        }
       },
     }),
   ],
