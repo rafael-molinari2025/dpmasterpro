@@ -14,7 +14,7 @@
     "db:studio": "prisma studio",
     "setup": "pnpm install && pnpm db:generate"
   },
-  "packageManager": "pnpm@11.5.2",
+  "packageManager": "npm@10.9.2",
   "dependencies": {
     "@auth/prisma-adapter": "^2.8.0",
     "@prisma/client": "^6.3.0",
