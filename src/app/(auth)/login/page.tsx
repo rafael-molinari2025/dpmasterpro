@@ -1,6 +1,43 @@
-import { Banknote, Lock, Mail, Eye, EyeOff } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { Banknote, Lock, Mail, Eye, EyeOff, AlertCircle } from "lucide-react";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [erro, setErro] = useState("");
+  const [carregando, setCarregando] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setErro("");
+    setCarregando(true);
+
+    try {
+      const result = await signIn("credentials", {
+        email,
+        senha,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setErro("Email ou senha incorretos. Verifique suas credenciais.");
+      } else {
+        router.push("/dashboard");
+        router.refresh();
+      }
+    } catch {
+      setErro("Erro ao conectar. Tente novamente.");
+    } finally {
+      setCarregando(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-slate-900 flex">
       {/* Left Panel */}
@@ -53,14 +90,24 @@ export default function LoginPage() {
           <h2 className="text-2xl font-bold text-gray-900 mb-1">Bem-vindo de volta</h2>
           <p className="text-gray-500 text-sm mb-8">Entre com suas credenciais para acessar o sistema.</p>
 
-          <form className="space-y-4">
+          {erro && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
+              <p className="text-sm text-red-600">{erro}</p>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="text-sm font-medium text-gray-700 block mb-1.5">Email</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
                   type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="seu@escritorio.com.br"
+                  required
                   className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -69,31 +116,33 @@ export default function LoginPage() {
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="text-sm font-medium text-gray-700">Senha</label>
-                <a href="#" className="text-xs text-blue-600 hover:underline">Esqueceu a senha?</a>
               </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
-                  type="password"
+                  type={mostrarSenha ? "text" : "password"}
+                  value={senha}
+                  onChange={(e) => setSenha(e.target.value)}
                   placeholder="••••••••"
+                  required
                   className="w-full pl-10 pr-10 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                  <Eye className="w-4 h-4" />
+                <button
+                  type="button"
+                  onClick={() => setMostrarSenha(!mostrarSenha)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {mostrarSenha ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <input type="checkbox" id="lembrar" className="w-4 h-4 rounded border-gray-300 text-blue-600" />
-              <label htmlFor="lembrar" className="text-sm text-gray-600">Manter conectado por 7 dias</label>
-            </div>
-
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+              disabled={carregando}
+              className="w-full bg-blue-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Entrar no Sistema
+              {carregando ? "Entrando..." : "Entrar no Sistema"}
             </button>
           </form>
 
@@ -101,13 +150,6 @@ export default function LoginPage() {
             <p className="text-xs text-blue-700 font-medium">Acesso Multi-Empresa</p>
             <p className="text-xs text-blue-600 mt-0.5">
               Um único login para gerenciar todas as empresas clientes do seu escritório.
-            </p>
-          </div>
-
-          <div className="mt-6 text-center">
-            <p className="text-xs text-gray-400">
-              Ao entrar, você concorda com os <a href="#" className="text-blue-600 hover:underline">Termos de Uso</a> e{" "}
-              <a href="#" className="text-blue-600 hover:underline">Política de Privacidade</a>
             </p>
           </div>
         </div>
