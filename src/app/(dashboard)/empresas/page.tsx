@@ -109,7 +109,7 @@ export default async function EmpresasPage({
                       <td className="px-5 py-4 text-sm text-gray-600 font-mono">{e.cnpj}</td>
                       <td className="px-5 py-4">
                         <span className="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-700">
-                          {regimeLabel[e.regime] ?? e.regime}
+                          {regimeLabel[e.regimeTributario] ?? e.regimeTributario}
                         </span>
                       </td>
                       <td className="px-5 py-4 text-sm text-gray-600">
