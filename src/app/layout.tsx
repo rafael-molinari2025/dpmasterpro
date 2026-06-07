@@ -5,8 +5,11 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "SYS-DP | Departamento Pessoal",
+  title: "DP Master Pro",
   description: "Sistema completo de Departamento Pessoal e RH para escritórios contábeis",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
