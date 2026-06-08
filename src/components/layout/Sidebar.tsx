@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Building2, Users, FileText, BookOpen,
   Calculator, Umbrella, UserMinus, Send, Receipt, BarChart3,
   Shield, Upload, Settings, ChevronDown, ChevronRight, LogOut,
-  Banknote, BookMarked,
+  Banknote, BookMarked, Activity,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -90,6 +90,7 @@ const navItems: NavItem[] = [
   { label: "LGPD",              href: "/lgpd",         icon: Shield,          modulo: "lgpd" },
   { label: "Importação",        href: "/importacao",   icon: Upload,          modulo: "importacao" },
   { label: "Manual",            href: "/manual",       icon: BookMarked },
+  { label: "Logs do Sistema",   href: "/configuracoes/logs", icon: Activity, adminOnly: true },
   { label: "Configurações",     href: "/configuracoes", icon: Settings,       adminOnly: true },
 ];
 
