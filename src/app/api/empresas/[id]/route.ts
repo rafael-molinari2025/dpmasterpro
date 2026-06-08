@@ -69,8 +69,20 @@ export async function PATCH(
             if (cn) titular = cn.value as string;
           }
         }
-      } catch {
-        // Se não conseguir ler metadados, salva sem eles
+      } catch (certErr: any) {
+        const msg: string = certErr?.message ?? "";
+        // Erro de senha → informar o usuário; outro erro → salva sem metadados
+        if (
+          msg.toLowerCase().includes("mac") ||
+          msg.toLowerCase().includes("password") ||
+          msg.toLowerCase().includes("invalid") ||
+          msg.toLowerCase().includes("wrong")
+        ) {
+          return NextResponse.json(
+            { error: "Senha do certificado inválida ou arquivo corrompido." },
+            { status: 400 }
+          );
+        }
       }
       certificadoDigital = { pfxBase64: certificadoPfxBase64, senha: certificadoSenha, validade, titular };
     }

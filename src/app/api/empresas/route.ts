@@ -30,7 +30,10 @@ export async function POST(request: Request) {
       data: { ...body, escritorioId },
     });
     return NextResponse.json(empresa, { status: 201 });
-  } catch {
+  } catch (error: any) {
+    if (error?.code === "P2002") {
+      return NextResponse.json({ error: "CNPJ já cadastrado neste escritório." }, { status: 409 });
+    }
     return NextResponse.json({ error: "Erro ao criar empresa" }, { status: 500 });
   }
 }
