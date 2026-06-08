@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth-guard";
+import { registrarLog } from "@/lib/logger";
 
 export async function GET() {
   const guard = await requireAdmin();
@@ -35,6 +36,18 @@ export async function PATCH(request: Request) {
       where: { id: escritorioId },
       data,
       select: { id: true, nome: true, cnpj: true, email: true, telefone: true, plano: true, configuracoes: true },
+    });
+
+    const campos = Object.keys(data).join(", ");
+    await registrarLog({
+      escritorioId,
+      usuarioId: guard.session.userId,
+      nomeUsuario: guard.session.name,
+      tipo: "CONFIGURACAO",
+      modulo: "configuracoes",
+      acao: "ATUALIZAR",
+      descricao: `Configurações do escritório atualizadas: ${campos}`,
+      detalhes: { camposAlterados: Object.keys(data) },
     });
 
     return NextResponse.json(updated);

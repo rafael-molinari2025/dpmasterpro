@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-guard";
+import { registrarLog } from "@/lib/logger";
 
 export async function GET() {
   const guard = await requireAuth();
@@ -28,6 +29,16 @@ export async function POST(request: Request) {
     const body = await request.json();
     const empresa = await db.empresa.create({
       data: { ...body, escritorioId },
+    });
+    await registrarLog({
+      escritorioId,
+      usuarioId: guard.session.userId,
+      nomeUsuario: guard.session.name,
+      tipo: "EMPRESA",
+      modulo: "empresas",
+      acao: "CRIAR",
+      descricao: `Empresa criada: ${empresa.razaoSocial} (CNPJ ${empresa.cnpj})`,
+      detalhes: { empresaId: empresa.id, cnpj: empresa.cnpj, razaoSocial: empresa.razaoSocial, regimeTributario: empresa.regimeTributario },
     });
     return NextResponse.json(empresa, { status: 201 });
   } catch (error: any) {

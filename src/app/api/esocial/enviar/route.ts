@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-guard";
 import { transmitirEventos } from "@/lib/esocial-transmissao";
+import { registrarLog } from "@/lib/logger";
 
 const AMBIENTE = (process.env.ESOCIAL_AMBIENTE ?? "2") as "1" | "2";
 
@@ -69,6 +70,25 @@ export async function POST(request: Request) {
         protocolo: resultado.protocolo,
         xmlRetorno: resultado.xmlRetorno,
         dataEnvio: new Date(),
+      },
+    });
+
+    await registrarLog({
+      escritorioId,
+      usuarioId: guard.session.userId,
+      nomeUsuario: guard.session.name,
+      nivel: resultado.modoDemo ? "AVISO" : "INFO",
+      tipo: "ESOCIAL",
+      modulo: "esocial",
+      acao: "TRANSMITIR",
+      descricao: `eSocial transmitido: ${empresa.razaoSocial} — ${eventosParaEnviar.length} evento(s)${resultado.modoDemo ? " [MODO DEMO]" : ""}`,
+      detalhes: {
+        empresaId,
+        empresaNome: empresa.razaoSocial,
+        quantidadeEventos: eventosParaEnviar.length,
+        protocolo: resultado.protocolo,
+        modoDemo: resultado.modoDemo,
+        ambiente: AMBIENTE === "1" ? "Produção" : "Homologação",
       },
     });
 

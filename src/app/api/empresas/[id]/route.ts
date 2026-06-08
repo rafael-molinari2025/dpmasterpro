@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-guard";
+import { registrarLog } from "@/lib/logger";
 
 export async function GET(
   _req: Request,
@@ -96,7 +97,18 @@ export async function PATCH(
       data: { ...dadosEmpresa, certificadoDigital },
     });
 
-    // Sanitizar retorno
+    const certAtualizado = certificadoPfxBase64 ? "certificado atualizado" : certificadoRemover ? "certificado removido" : null;
+    await registrarLog({
+      escritorioId,
+      usuarioId: guard.session.userId,
+      nomeUsuario: guard.session.name,
+      tipo: "EMPRESA",
+      modulo: "empresas",
+      acao: "EDITAR",
+      descricao: `Empresa editada: ${updated.razaoSocial}${certAtualizado ? ` (${certAtualizado})` : ""}`,
+      detalhes: { empresaId: id, ...(certAtualizado ? { certificado: certAtualizado } : {}) },
+    });
+
     const cert = updated.certificadoDigital as { pfxBase64?: string; validade?: string; titular?: string } | null;
     return NextResponse.json({
       ...updated,

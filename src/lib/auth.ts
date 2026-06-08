@@ -3,6 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { getPermissoes } from "@/lib/permissoes";
+import { registrarLog } from "@/lib/logger";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
@@ -20,18 +21,55 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             where: { email: credentials.email as string },
           });
 
-          if (!usuario || !usuario.ativo) return null;
+          if (!usuario || !usuario.ativo) {
+            if (usuario) {
+              void registrarLog({
+                escritorioId: usuario.escritorioId,
+                usuarioId: usuario.id,
+                nomeUsuario: usuario.nome,
+                nivel: "AVISO",
+                tipo: "AUTENTICACAO",
+                modulo: "auth",
+                acao: "LOGIN_CONTA_INATIVA",
+                descricao: `Tentativa de login em conta inativa: ${usuario.email}`,
+              });
+            }
+            return null;
+          }
 
           const senhaValida = await bcrypt.compare(
             credentials.senha as string,
             usuario.senha
           );
-          if (!senhaValida) return null;
+          if (!senhaValida) {
+            void registrarLog({
+              escritorioId: usuario.escritorioId,
+              usuarioId: usuario.id,
+              nomeUsuario: usuario.nome,
+              nivel: "AVISO",
+              tipo: "AUTENTICACAO",
+              modulo: "auth",
+              acao: "LOGIN_SENHA_INCORRETA",
+              descricao: `Tentativa de login com senha incorreta para ${usuario.email}`,
+            });
+            return null;
+          }
 
           db.usuario.update({
             where: { id: usuario.id },
             data: { ultimoAcesso: new Date() },
           }).catch(() => {});
+
+          void registrarLog({
+            escritorioId: usuario.escritorioId,
+            usuarioId: usuario.id,
+            nomeUsuario: usuario.nome,
+            nivel: "INFO",
+            tipo: "AUTENTICACAO",
+            modulo: "auth",
+            acao: "LOGIN",
+            descricao: `Login realizado por ${usuario.nome} (${usuario.email})`,
+          });
 
           return {
             id: usuario.id,

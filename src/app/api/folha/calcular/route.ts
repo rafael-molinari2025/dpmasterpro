@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-guard";
 import { calcularINSS, calcularIRRF, calcularFGTS } from "@/lib/calculos";
+import { registrarLog } from "@/lib/logger";
 
 export async function POST(request: Request) {
   const guard = await requireAuth();
@@ -99,6 +100,31 @@ export async function POST(request: Request) {
     const folhaAtualizada = await db.folha.update({
       where: { id: folha.id },
       data: { status: "ABERTA", totalProventos, totalDescontos, totalLiquido: totalProventos - totalDescontos, totalINSSEmpregado, totalINSSPatronal, totalFGTS, totalIRRF },
+    });
+
+    await registrarLog({
+      escritorioId,
+      usuarioId: guard.session.userId,
+      nomeUsuario: guard.session.name,
+      tipo: "FOLHA",
+      modulo: "folha",
+      acao: "CALCULAR",
+      descricao: `Folha calculada: ${empresa.razaoSocial} — ${competencia} (${tipo}) — ${funcionarios.length} funcionário(s)`,
+      detalhes: {
+        folhaId: folhaAtualizada.id,
+        empresaId,
+        empresaNome: empresa.razaoSocial,
+        competencia,
+        tipo,
+        funcionariosProcessados: funcionarios.length,
+        totalProventos:    parseFloat(folhaAtualizada.totalProventos.toString()),
+        totalDescontos:    parseFloat(folhaAtualizada.totalDescontos.toString()),
+        totalLiquido:      parseFloat(folhaAtualizada.totalLiquido.toString()),
+        totalINSSEmpregado: parseFloat(folhaAtualizada.totalINSSEmpregado.toString()),
+        totalINSSPatronal:  parseFloat(folhaAtualizada.totalINSSPatronal.toString()),
+        totalFGTS:         parseFloat(folhaAtualizada.totalFGTS.toString()),
+        totalIRRF:         parseFloat(folhaAtualizada.totalIRRF.toString()),
+      },
     });
 
     return NextResponse.json({ folha: folhaAtualizada, funcionariosProcessados: funcionarios.length });

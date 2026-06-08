@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-guard";
+import { registrarLog } from "@/lib/logger";
 
 export async function GET(request: Request) {
   const guard = await requireAuth();
@@ -60,6 +61,16 @@ export async function POST(request: Request) {
         cargo: { select: { descricao: true } },
         setor: { select: { descricao: true } },
       },
+    });
+    await registrarLog({
+      escritorioId,
+      usuarioId: guard.session.userId,
+      nomeUsuario: guard.session.name,
+      tipo: "FUNCIONARIO",
+      modulo: "funcionarios",
+      acao: "CRIAR",
+      descricao: `Funcionário cadastrado: ${funcionario.nome} — Matrícula ${funcionario.matricula} (${empresa.razaoSocial})`,
+      detalhes: { funcionarioId: funcionario.id, nome: funcionario.nome, matricula: funcionario.matricula, empresaId: funcionario.empresaId, tipoContrato: funcionario.tipoContrato },
     });
     return NextResponse.json(funcionario, { status: 201 });
   } catch (error: any) {

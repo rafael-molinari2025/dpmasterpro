@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth-guard";
+import { registrarLog } from "@/lib/logger";
 
 export async function GET(request: Request) {
   const guard = await requireAdmin();
@@ -83,6 +84,17 @@ export async function GET(request: Request) {
 
     const json = JSON.stringify(payload, (_, v) =>
       typeof v === "bigint" ? v.toString() : v, 2);
+
+    await registrarLog({
+      escritorioId,
+      usuarioId: guard.session.userId,
+      nomeUsuario: guard.session.name,
+      tipo: "BACKUP",
+      modulo: "backup",
+      acao: "DOWNLOAD",
+      descricao: `Backup baixado: tipo "${tipo}"`,
+      detalhes: { tipo, arquivo: `backup-dp-${tipo}-${agora}.json` },
+    });
 
     return new NextResponse(json, {
       status: 200,

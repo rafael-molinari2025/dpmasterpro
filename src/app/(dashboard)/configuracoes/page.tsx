@@ -1,5 +1,5 @@
 import Header from "@/components/layout/Header";
-import { Building2, Users, Shield, Bell, Database, Key, Globe, CreditCard } from "lucide-react";
+import { Building2, Users, Shield, Bell, Database, Key, Globe, CreditCard, Activity } from "lucide-react";
 import Link from "next/link";
 
 export default function ConfiguracoesPage() {
@@ -46,6 +46,11 @@ export default function ConfiguracoesPage() {
               color: "indigo", href: "/configuracoes/plano",
             },
             {
+              icon: Activity, title: "Logs do Sistema",
+              desc: "Monitoramento de operações, cálculos de folha, eSocial e erros em tempo real.",
+              color: "teal", href: "/configuracoes/logs",
+            },
+            {
               icon: Shield, title: "Segurança",
               desc: "Políticas de senha, sessão, 2FA e log de acessos.",
               color: "rose", href: null,
@@ -61,6 +66,7 @@ export default function ConfiguracoesPage() {
               slate: { icon: "bg-slate-100 text-slate-600", btn: "bg-slate-600 hover:bg-slate-700" },
               indigo: { icon: "bg-indigo-50 text-indigo-600", btn: "bg-indigo-600 hover:bg-indigo-700" },
               rose: { icon: "bg-rose-50 text-rose-600", btn: "bg-rose-600 hover:bg-rose-700" },
+              teal: { icon: "bg-teal-50 text-teal-600", btn: "bg-teal-600 hover:bg-teal-700" },
             };
             const c = colors[card.color];
             const btnContent = (

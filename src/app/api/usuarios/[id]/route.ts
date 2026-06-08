@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAdmin, requireAuth } from "@/lib/auth-guard";
 import bcrypt from "bcryptjs";
+import { registrarLog } from "@/lib/logger";
 
 export async function GET(
   _req: Request,
@@ -56,6 +57,25 @@ export async function PATCH(
       select: { id: true, nome: true, email: true, perfil: true, permissoes: true, ativo: true },
     });
 
+    const alteracoes: string[] = [];
+    if (nome !== undefined) alteracoes.push("nome");
+    if (email !== undefined) alteracoes.push("e-mail");
+    if (senha) alteracoes.push("senha");
+    if (perfil !== undefined) alteracoes.push("perfil");
+    if (permissoes !== undefined) alteracoes.push("permissões");
+    if (ativo !== undefined) alteracoes.push(ativo ? "reativado" : "desativado");
+
+    await registrarLog({
+      escritorioId,
+      usuarioId: guard.session.userId,
+      nomeUsuario: guard.session.name,
+      tipo: "USUARIO",
+      modulo: "usuarios",
+      acao: "EDITAR",
+      descricao: `Usuário editado: ${updated.nome} (${updated.email}) — alterações: ${alteracoes.join(", ")}`,
+      detalhes: { usuarioEditadoId: id, nome: updated.nome, email: updated.email, alteracoes },
+    });
+
     return NextResponse.json(updated);
   } catch (error: any) {
     if (error.code === "P2002") {
@@ -83,5 +103,18 @@ export async function DELETE(
   if (!usuario) return NextResponse.json({ error: "Usuário não encontrado" }, { status: 404 });
 
   await db.usuario.delete({ where: { id } });
+
+  await registrarLog({
+    escritorioId,
+    usuarioId: guard.session.userId,
+    nomeUsuario: guard.session.name,
+    nivel: "AVISO",
+    tipo: "USUARIO",
+    modulo: "usuarios",
+    acao: "EXCLUIR",
+    descricao: `Usuário excluído: ${usuario.nome} (${usuario.email})`,
+    detalhes: { usuarioExcluidoId: id, nome: usuario.nome, email: usuario.email, perfil: usuario.perfil },
+  });
+
   return NextResponse.json({ ok: true });
 }

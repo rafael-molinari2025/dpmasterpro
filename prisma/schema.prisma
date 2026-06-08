@@ -25,6 +25,7 @@ model Escritorio {
 
   usuarios  Usuario[]
   empresas  Empresa[]
+  logs      LogSistema[]
 
   @@map("escritorios")
 }
@@ -48,6 +49,7 @@ model Usuario {
   sessions   Session[]
   auditoria  Auditoria[]
   consentimentosProcessados ConsentimentoLGPD[]
+  logs       LogSistema[] @relation("LogsDoUsuario")
 
   @@map("usuarios")
 }
@@ -546,6 +548,30 @@ model ConsentimentoLGPD {
   @@map("consentimentos_lgpd")
 }
 
+// ─── LOGS DO SISTEMA ─────────────────────────────────────────────────────────
+
+model LogSistema {
+  id           String    @id @default(cuid())
+  escritorioId String
+  escritorio   Escritorio @relation(fields: [escritorioId], references: [id])
+  usuarioId    String?
+  usuario      Usuario?   @relation("LogsDoUsuario", fields: [usuarioId], references: [id])
+  nomeUsuario  String?
+  nivel        NivelLog  @default(INFO)
+  tipo         TipoLog
+  modulo       String
+  acao         String
+  descricao    String
+  detalhes     Json?
+  ip           String?
+  createdAt    DateTime  @default(now())
+
+  @@index([escritorioId, createdAt(sort: Desc)])
+  @@index([escritorioId, nivel])
+  @@index([escritorioId, tipo])
+  @@map("logs_sistema")
+}
+
 // ─── AUDITORIA ───────────────────────────────────────────────────────────────
 
 model Auditoria {
@@ -726,4 +752,25 @@ enum TipoConsentimento {
   COMPARTILHAMENTO
   MARKETING
   IMAGEM
+}
+
+enum NivelLog {
+  INFO
+  AVISO
+  ERRO
+  CRITICO
+}
+
+enum TipoLog {
+  AUTENTICACAO
+  EMPRESA
+  FUNCIONARIO
+  FOLHA
+  FERIAS
+  RESCISAO
+  ESOCIAL
+  BACKUP
+  USUARIO
+  CONFIGURACAO
+  SISTEMA
 }

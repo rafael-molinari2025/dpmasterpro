@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth-guard";
 import bcrypt from "bcryptjs";
 import { PERMISSOES_PADRAO } from "@/lib/permissoes";
+import { registrarLog } from "@/lib/logger";
 
 export async function GET() {
   const guard = await requireAdmin();
@@ -56,6 +57,17 @@ export async function POST(request: Request) {
         permissoes: permissoesFinal,
       },
       select: { id: true, nome: true, email: true, perfil: true, permissoes: true, ativo: true, createdAt: true },
+    });
+
+    await registrarLog({
+      escritorioId,
+      usuarioId: guard.session.userId,
+      nomeUsuario: guard.session.name,
+      tipo: "USUARIO",
+      modulo: "usuarios",
+      acao: "CRIAR",
+      descricao: `Usuário criado: ${usuario.nome} (${usuario.email}) — perfil ${usuario.perfil}`,
+      detalhes: { novoUsuarioId: usuario.id, nome: usuario.nome, email: usuario.email, perfil: usuario.perfil },
     });
 
     return NextResponse.json(usuario, { status: 201 });
