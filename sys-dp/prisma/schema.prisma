@@ -1,0 +1,776 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─── MULTI-TENANT ────────────────────────────────────────────────────────────
+
+model Escritorio {
+  id        String   @id @default(cuid())
+  nome      String
+  cnpj      String   @unique
+  email     String
+  telefone  String?
+  endereco  Json?
+  plano          Plano    @default(BASICO)
+  configuracoes  Json?
+  ativo          Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  usuarios  Usuario[]
+  empresas  Empresa[]
+  logs      LogSistema[]
+
+  @@map("escritorios")
+}
+
+model Usuario {
+  id           String    @id @default(cuid())
+  escritorioId String
+  nome         String
+  email        String    @unique
+  senha        String
+  perfil       Perfil    @default(OPERADOR)
+  permissoes   Json      @default("[]")
+  ativo        Boolean   @default(true)
+  mfaSecret    String?
+  mfaAtivo     Boolean   @default(false)
+  ultimoAcesso DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  escritorio Escritorio @relation(fields: [escritorioId], references: [id])
+  sessions   Session[]
+  auditoria  Auditoria[]
+  consentimentosProcessados ConsentimentoLGPD[]
+  logs       LogSistema[] @relation("LogsDoUsuario")
+
+  @@map("usuarios")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  usuarioId String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+// ─── EMPRESA CLIENTE ─────────────────────────────────────────────────────────
+
+model Empresa {
+  id           String   @id @default(cuid())
+  escritorioId String
+  razaoSocial  String
+  nomeFantasia String?
+  cnpj         String   @unique
+  inscEstadual String?
+  inscMunicipal String?
+  cnae         String?
+  naturezaJuridica String?
+  regimeTributario RegimeTributario @default(LUCRO_PRESUMIDO)
+  recolheINSSPatronal Boolean @default(true)
+  aliquotaRAT  Decimal  @default(1.0)  @db.Decimal(5, 2)
+  fatorMEI     Decimal  @default(1.0)  @db.Decimal(5, 2)
+  responsavelNome String?
+  responsavelCPF  String?
+  email        String?
+  telefone     String?
+  endereco     Json?
+  certificadoDigital Json? // A1 criptografado
+  ativa        Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  escritorio  Escritorio  @relation(fields: [escritorioId], references: [id])
+  funcionarios Funcionario[]
+  cargos      Cargo[]
+  setores     Setor[]
+  folhas      Folha[]
+  ferias      Ferias[]
+  rescisoes   Rescisao[]
+  eventosSocial EventoEsocial[]
+  guias       GuiaPagamento[]
+  convencoesColetivas ConvencaoColetiva[]
+
+  @@map("empresas")
+}
+
+// ─── CARGOS E SETORES ────────────────────────────────────────────────────────
+
+model Cargo {
+  id          String  @id @default(cuid())
+  empresaId   String
+  codigo      String
+  descricao   String
+  cbo         String?
+  salarioBase Decimal @db.Decimal(12, 2)
+  ativo       Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  empresa     Empresa @relation(fields: [empresaId], references: [id])
+  funcionarios Funcionario[]
+
+  @@unique([empresaId, codigo])
+  @@map("cargos")
+}
+
+model Setor {
+  id        String  @id @default(cuid())
+  empresaId String
+  codigo    String
+  descricao String
+  centroCusto String?
+  ativo     Boolean @default(true)
+  createdAt DateTime @default(now())
+
+  empresa   Empresa @relation(fields: [empresaId], references: [id])
+  funcionarios Funcionario[]
+
+  @@unique([empresaId, codigo])
+  @@map("setores")
+}
+
+// ─── FUNCIONÁRIO ─────────────────────────────────────────────────────────────
+
+model Funcionario {
+  id           String   @id @default(cuid())
+  empresaId    String
+  cargoId      String?
+  setorId      String?
+  matricula    String
+  nome         String
+  cpf          String
+  rg           String?
+  rgOrgao      String?
+  rgUF         String?
+  dataNascimento DateTime
+  sexo         Sexo
+  estadoCivil  EstadoCivil @default(SOLTEIRO)
+  escolaridade Escolaridade?
+  pcd          Boolean @default(false)
+  tipoPCD      String?
+  naturalidade String?
+  nacionalidade String @default("Brasileiro")
+  // Contato
+  email        String?
+  telefone     String?
+  celular      String?
+  // Endereço
+  endereco     Json?
+  // Dados trabalhistas
+  tipoContrato TipoContrato @default(CLT)
+  dataAdmissao DateTime
+  dataDemissao DateTime?
+  salario      Decimal  @db.Decimal(12, 2)
+  jornadaHoras Int      @default(220)
+  tipoJornada  TipoJornada @default(MENSAL)
+  // Documentos trabalhistas
+  ctps         String?
+  ctpsSerie    String?
+  ctpsUF       String?
+  pisPasep     String?
+  // Dados previdenciários
+  categoriaESocial String @default("101")
+  // FGTS
+  optanteFGTS  Boolean @default(true)
+  contaFGTS    String?
+  // Sindicato
+  sindicatoId  String?
+  // Informações bancárias
+  banco        String?
+  agencia      String?
+  conta        String?
+  tipoConta    String?
+  // Status
+  situacao     SituacaoFuncionario @default(ATIVO)
+  motivoDemissao String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  empresa     Empresa   @relation(fields: [empresaId], references: [id])
+  cargo       Cargo?    @relation(fields: [cargoId], references: [id])
+  setor       Setor?    @relation(fields: [setorId], references: [id])
+  dependentes Dependente[]
+  itensFolha  ItemFolha[]
+  ferias      Ferias[]
+  rescisao    Rescisao?
+  consentimentos ConsentimentoLGPD[]
+  historicoSalario HistoricoSalario[]
+
+  @@unique([empresaId, matricula])
+  @@unique([empresaId, cpf])
+  @@map("funcionarios")
+}
+
+model Dependente {
+  id            String   @id @default(cuid())
+  funcionarioId String
+  nome          String
+  cpf           String?
+  dataNascimento DateTime
+  parentesco    Parentesco
+  invalidez     Boolean  @default(false)
+  deducaoIRRF   Boolean  @default(true)
+  planoSaude    Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  funcionario Funcionario @relation(fields: [funcionarioId], references: [id], onDelete: Cascade)
+
+  @@map("dependentes")
+}
+
+model HistoricoSalario {
+  id            String   @id @default(cuid())
+  funcionarioId String
+  salarioAnterior Decimal @db.Decimal(12, 2)
+  salarioNovo   Decimal  @db.Decimal(12, 2)
+  dataAlteracao DateTime
+  motivo        String?
+  createdAt     DateTime @default(now())
+
+  funcionario Funcionario @relation(fields: [funcionarioId], references: [id])
+
+  @@map("historico_salarios")
+}
+
+// ─── CONVENÇÃO COLETIVA ───────────────────────────────────────────────────────
+
+model ConvencaoColetiva {
+  id        String   @id @default(cuid())
+  empresaId String
+  descricao String
+  sindicato String
+  vigenciaInicio DateTime
+  vigenciaFim    DateTime
+  pisoSalarial   Decimal? @db.Decimal(12, 2)
+  reajuste       Decimal? @db.Decimal(5, 2)
+  arquivo        String?
+  createdAt DateTime @default(now())
+
+  empresa Empresa @relation(fields: [empresaId], references: [id])
+
+  @@map("convencoes_coletivas")
+}
+
+// ─── RUBRICAS E EVENTOS ──────────────────────────────────────────────────────
+
+model Rubrica {
+  id           String   @id @default(cuid())
+  codigo       String
+  descricao    String
+  tipo         TipoRubrica
+  naturezaESocial String  // Código da Tabela 03 do eSocial
+  incideINSS   Boolean  @default(false)
+  incideFGTS   Boolean  @default(false)
+  incideIRRF   Boolean  @default(false)
+  incide13     Boolean  @default(false)
+  incideFerias Boolean  @default(false)
+  incideRescisao Boolean @default(false)
+  formulaCalculo String? // JS expression
+  ativa        Boolean  @default(true)
+  global       Boolean  @default(true) // disponível para todas empresas
+  empresaId    String?  // null = global
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  itensFolha  ItemFolha[]
+
+  @@unique([codigo])
+  @@map("rubricas")
+}
+
+// ─── TABELAS LEGAIS ──────────────────────────────────────────────────────────
+
+model TabelaINSS {
+  id         String   @id @default(cuid())
+  ano        Int
+  vigencia   DateTime
+  faixas     Json     // Array de { de, ate, aliquota }
+  tetoContribuicao Decimal @db.Decimal(12, 2)
+  salarioMinimo    Decimal @db.Decimal(12, 2)
+  ativa      Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  @@unique([ano])
+  @@map("tabelas_inss")
+}
+
+model TabelaIRRF {
+  id         String   @id @default(cuid())
+  ano        Int
+  vigencia   DateTime
+  faixas     Json     // Array de { de, ate, aliquota, deducao }
+  deducaoPorDependente Decimal @db.Decimal(12, 2)
+  deducaoSimplificada  Decimal @db.Decimal(12, 2)
+  limiteIsencao        Decimal @db.Decimal(12, 2)
+  // Reforma 2026 - redutor adicional
+  usaRedutorAdicional  Boolean @default(false)
+  redutorAdicional     Json?   // Array de { de, ate, redutor }
+  ativa      Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  @@unique([ano])
+  @@map("tabelas_irrf")
+}
+
+model TabelaFGTS {
+  id            String   @id @default(cuid())
+  ano           Int
+  aliquota      Decimal  @db.Decimal(5, 2) // 8% padrão
+  aliquotaJovemAprendiz Decimal @db.Decimal(5, 2) // 2%
+  vigencia      DateTime
+  ativa         Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  @@unique([ano])
+  @@map("tabelas_fgts")
+}
+
+model TabelaSalarioMinimo {
+  id            String   @id @default(cuid())
+  ano           Int
+  valor         Decimal  @db.Decimal(12, 2)
+  vigencia      DateTime
+  ativa         Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  @@unique([ano])
+  @@map("tabelas_salario_minimo")
+}
+
+// ─── FOLHA DE PAGAMENTO ──────────────────────────────────────────────────────
+
+model Folha {
+  id           String   @id @default(cuid())
+  empresaId    String
+  competencia  String   // YYYY-MM
+  tipo         TipoFolha @default(NORMAL)
+  status       StatusFolha @default(ABERTA)
+  totalProventos   Decimal @default(0) @db.Decimal(14, 2)
+  totalDescontos   Decimal @default(0) @db.Decimal(14, 2)
+  totalLiquido     Decimal @default(0) @db.Decimal(14, 2)
+  totalINSSEmpregado Decimal @default(0) @db.Decimal(14, 2)
+  totalINSSPatronal  Decimal @default(0) @db.Decimal(14, 2)
+  totalFGTS        Decimal @default(0) @db.Decimal(14, 2)
+  totalIRRF        Decimal @default(0) @db.Decimal(14, 2)
+  dataFechamento   DateTime?
+  observacao   String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  empresa  Empresa    @relation(fields: [empresaId], references: [id])
+  itens    ItemFolha[]
+  guias    GuiaPagamento[]
+
+  @@unique([empresaId, competencia, tipo])
+  @@map("folhas")
+}
+
+model ItemFolha {
+  id            String  @id @default(cuid())
+  folhaId       String
+  funcionarioId String
+  rubricaId     String
+  descricao     String
+  tipo          TipoRubrica
+  referencia    Decimal? @db.Decimal(10, 4) // horas, dias, %
+  valor         Decimal  @db.Decimal(12, 2)
+  baseINSS      Decimal  @default(0) @db.Decimal(12, 2)
+  baseFGTS      Decimal  @default(0) @db.Decimal(12, 2)
+  baseIRRF      Decimal  @default(0) @db.Decimal(12, 2)
+  manual        Boolean  @default(false)
+  observacao    String?
+  createdAt     DateTime @default(now())
+
+  folha       Folha       @relation(fields: [folhaId], references: [id], onDelete: Cascade)
+  funcionario Funcionario @relation(fields: [funcionarioId], references: [id])
+  rubrica     Rubrica     @relation(fields: [rubricaId], references: [id])
+
+  @@map("itens_folha")
+}
+
+// ─── FÉRIAS ──────────────────────────────────────────────────────────────────
+
+model Ferias {
+  id             String  @id @default(cuid())
+  empresaId      String
+  funcionarioId  String
+  periodoAquisitivo String // Ex: "2023-01/2024-01"
+  dataInicioAquisitivo DateTime
+  dataFimAquisitivo    DateTime
+  dataInicioGozo       DateTime?
+  dataFimGozo          DateTime?
+  diasDireito    Int     @default(30)
+  diasGozo       Int?
+  diasAbono      Int     @default(0)  // Abono pecuniário (máx 10)
+  diasPerdidos   Int     @default(0)  // Faltas não justificadas
+  adiantamento13 Boolean @default(false)
+  status         StatusFerias @default(A_VENCER)
+  valorFerias    Decimal? @db.Decimal(12, 2)
+  valorAbono     Decimal? @db.Decimal(12, 2)
+  valorTerceiro  Decimal? @db.Decimal(12, 2)
+  valorINSS      Decimal? @db.Decimal(12, 2)
+  valorIRRF      Decimal? @db.Decimal(12, 2)
+  valorLiquido   Decimal? @db.Decimal(12, 2)
+  observacao     String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  empresa     Empresa     @relation(fields: [empresaId], references: [id])
+  funcionario Funcionario @relation(fields: [funcionarioId], references: [id])
+
+  @@map("ferias")
+}
+
+// ─── RESCISÃO ────────────────────────────────────────────────────────────────
+
+model Rescisao {
+  id            String  @id @default(cuid())
+  funcionarioId String  @unique
+  empresaId     String
+  tipoRescisao  TipoRescisao
+  dataDemissao  DateTime
+  dataAviso     DateTime?
+  avisoPrevio   TipoAvisoPrevio @default(TRABALHADO)
+  diasAviso     Int     @default(30)
+  // Verbas rescisórias
+  saldoSalario  Decimal @default(0) @db.Decimal(12, 2)
+  feriasPropor  Decimal @default(0) @db.Decimal(12, 2)
+  feriasVencidas Decimal @default(0) @db.Decimal(12, 2)
+  tercoFerias   Decimal @default(0) @db.Decimal(12, 2)
+  decimoTerceiro Decimal @default(0) @db.Decimal(12, 2)
+  multaFGTS     Decimal @default(0) @db.Decimal(12, 2)
+  indenAviso    Decimal @default(0) @db.Decimal(12, 2)
+  // Descontos
+  inssRescisao  Decimal @default(0) @db.Decimal(12, 2)
+  irrf          Decimal @default(0) @db.Decimal(12, 2)
+  // Totais
+  totalBruto    Decimal @default(0) @db.Decimal(12, 2)
+  totalDescontos Decimal @default(0) @db.Decimal(12, 2)
+  totalLiquido  Decimal @default(0) @db.Decimal(12, 2)
+  fgtsADepositar Decimal @default(0) @db.Decimal(12, 2)
+  // Homologação
+  dataHomologacao DateTime?
+  observacao    String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  funcionario Funcionario @relation(fields: [funcionarioId], references: [id])
+  empresa     Empresa     @relation(fields: [empresaId], references: [id])
+
+  @@map("rescisoes")
+}
+
+// ─── eSocial ─────────────────────────────────────────────────────────────────
+
+model EventoEsocial {
+  id          String   @id @default(cuid())
+  empresaId   String
+  tipoEvento  String   // S-1000, S-1010, S-1200, S-2200, etc.
+  descricao   String
+  competencia String?
+  xmlGerado   String?  @db.Text
+  xmlRetorno  String?  @db.Text
+  protocolo   String?
+  status      StatusESocial @default(PENDENTE)
+  erros       Json?
+  tentativas  Int      @default(0)
+  dataEnvio   DateTime?
+  dataRetorno DateTime?
+  referencia  String?  // ID do objeto que gerou o evento
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  empresa Empresa @relation(fields: [empresaId], references: [id])
+
+  @@map("eventos_esocial")
+}
+
+// ─── GUIAS DE PAGAMENTO ──────────────────────────────────────────────────────
+
+model GuiaPagamento {
+  id          String   @id @default(cuid())
+  empresaId   String
+  folhaId     String?
+  tipo        TipoGuia
+  competencia String   // YYYY-MM
+  dataVencimento DateTime
+  valorPrincipal Decimal @db.Decimal(12, 2)
+  valorMulta   Decimal @default(0) @db.Decimal(12, 2)
+  valorJuros   Decimal @default(0) @db.Decimal(12, 2)
+  valorTotal   Decimal @db.Decimal(12, 2)
+  codigoBarras String?
+  linhaDigitavel String?
+  pixCopiaCola String?
+  pdfUrl      String?
+  status      StatusGuia @default(PENDENTE)
+  dataPagamento DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  empresa Empresa @relation(fields: [empresaId], references: [id])
+  folha   Folha?  @relation(fields: [folhaId], references: [id])
+
+  @@map("guias_pagamento")
+}
+
+// ─── LGPD ────────────────────────────────────────────────────────────────────
+
+model ConsentimentoLGPD {
+  id            String   @id @default(cuid())
+  funcionarioId String
+  tipo          TipoConsentimento
+  descricao     String
+  concedido     Boolean  @default(false)
+  dataConsentimento DateTime?
+  dataRevogacao DateTime?
+  ipAddress     String?
+  processadoPorId String?
+  createdAt     DateTime @default(now())
+
+  funcionario    Funcionario @relation(fields: [funcionarioId], references: [id])
+  processadoPor  Usuario?    @relation(fields: [processadoPorId], references: [id])
+
+  @@map("consentimentos_lgpd")
+}
+
+// ─── LOGS DO SISTEMA ─────────────────────────────────────────────────────────
+
+model LogSistema {
+  id           String    @id @default(cuid())
+  escritorioId String
+  escritorio   Escritorio @relation(fields: [escritorioId], references: [id])
+  usuarioId    String?
+  usuario      Usuario?   @relation("LogsDoUsuario", fields: [usuarioId], references: [id])
+  nomeUsuario  String?
+  nivel        NivelLog  @default(INFO)
+  tipo         TipoLog
+  modulo       String
+  acao         String
+  descricao    String
+  detalhes     Json?
+  ip           String?
+  createdAt    DateTime  @default(now())
+
+  @@index([escritorioId, createdAt(sort: Desc)])
+  @@index([escritorioId, nivel])
+  @@index([escritorioId, tipo])
+  @@map("logs_sistema")
+}
+
+// ─── AUDITORIA ───────────────────────────────────────────────────────────────
+
+model Auditoria {
+  id        String   @id @default(cuid())
+  usuarioId String?
+  acao      String
+  entidade  String
+  entidadeId String?
+  dadosAnteriores Json?
+  dadosNovos      Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  usuario Usuario? @relation(fields: [usuarioId], references: [id])
+
+  @@map("auditoria")
+}
+
+// ─── ENUMS ───────────────────────────────────────────────────────────────────
+
+enum Plano {
+  BASICO
+  PROFISSIONAL
+  ENTERPRISE
+}
+
+enum Perfil {
+  ADMIN
+  GERENTE
+  OPERADOR
+  VISUALIZADOR
+}
+
+enum RegimeTributario {
+  SIMPLES_NACIONAL
+  LUCRO_PRESUMIDO
+  LUCRO_REAL
+  MEI
+}
+
+enum TipoContrato {
+  CLT
+  EXPERIENCIA
+  TEMPORARIO
+  ESTAGIO
+  JOVEM_APRENDIZ
+  PJ
+}
+
+enum TipoJornada {
+  MENSAL
+  SEMANAL
+  HORISTA
+}
+
+enum SituacaoFuncionario {
+  ATIVO
+  FERIAS
+  AFASTADO
+  DEMITIDO
+  SUSPENSO
+}
+
+enum Sexo {
+  M
+  F
+}
+
+enum EstadoCivil {
+  SOLTEIRO
+  CASADO
+  DIVORCIADO
+  VIUVO
+  UNIAO_ESTAVEL
+}
+
+enum Escolaridade {
+  FUNDAMENTAL_INCOMPLETO
+  FUNDAMENTAL_COMPLETO
+  MEDIO_INCOMPLETO
+  MEDIO_COMPLETO
+  SUPERIOR_INCOMPLETO
+  SUPERIOR_COMPLETO
+  POS_GRADUACAO
+  MESTRADO
+  DOUTORADO
+}
+
+enum Parentesco {
+  CONJUGE
+  FILHO
+  FILHA
+  ENTEADO
+  ENTEADA
+  PAI
+  MAE
+  IRMAO
+  IRMA
+  OUTROS
+}
+
+enum TipoRubrica {
+  PROVENTO
+  DESCONTO
+  INFORMATIVO
+  BASE_CALCULO
+}
+
+enum TipoFolha {
+  NORMAL
+  DECIMO_TERCEIRO_1
+  DECIMO_TERCEIRO_2
+  FERIAS
+  RESCISAO
+  COMPLEMENTAR
+  ADIANTAMENTO
+}
+
+enum StatusFolha {
+  ABERTA
+  EM_CALCULO
+  FECHADA
+  ENVIADA_ESOCIAL
+}
+
+enum StatusFerias {
+  A_VENCER
+  VENCIDA
+  AGENDADA
+  GOZADA
+  CANCELADA
+}
+
+enum TipoRescisao {
+  PEDIDO_DEMISSAO
+  DEMISSAO_SEM_JUSTA_CAUSA
+  DEMISSAO_COM_JUSTA_CAUSA
+  RESCISAO_INDIRETA
+  ACORDO_MUTUAL
+  APOSENTADORIA
+  FALECIMENTO
+  TERMINO_CONTRATO
+}
+
+enum TipoAvisoPrevio {
+  TRABALHADO
+  INDENIZADO
+  DISPENSADO
+}
+
+enum StatusESocial {
+  PENDENTE
+  ENVIANDO
+  ENVIADO
+  RETIFICADO
+  ERRO
+  REJEITADO
+}
+
+enum TipoGuia {
+  GPS_INSS
+  DARF_IRRF
+  FGTS_DIGITAL
+  DCTFWEB
+  GPS_PATRONAL
+}
+
+enum StatusGuia {
+  PENDENTE
+  PAGO
+  VENCIDA
+  CANCELADA
+}
+
+enum TipoConsentimento {
+  TRATAMENTO_DADOS
+  COMPARTILHAMENTO
+  MARKETING
+  IMAGEM
+}
+
+enum NivelLog {
+  INFO
+  AVISO
+  ERRO
+  CRITICO
+}
+
+enum TipoLog {
+  AUTENTICACAO
+  EMPRESA
+  FUNCIONARIO
+  FOLHA
+  FERIAS
+  RESCISAO
+  ESOCIAL
+  BACKUP
+  USUARIO
+  CONFIGURACAO
+  SISTEMA
+}
