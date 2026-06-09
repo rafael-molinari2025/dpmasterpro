@@ -67,7 +67,7 @@ export async function atualizarFerias(formData: FormData) {
     });
   } catch (err: any) {
     if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
-    redirect(`/ferias/${feriasId}?error=` + encodeURIComponent(String(err?.message ?? "Erro ao atualizar férias.")));
+    redirect(`/ferias/${feriasId}?error=` + encodeURIComponent("Erro ao atualizar férias. Verifique os dados e tente novamente."));
   }
 
   redirect("/ferias");

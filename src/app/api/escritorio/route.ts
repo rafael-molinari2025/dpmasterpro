@@ -52,6 +52,6 @@ export async function PATCH(request: Request) {
 
     return NextResponse.json(updated);
   } catch (error: any) {
-    return NextResponse.json({ error: error.message ?? "Erro ao atualizar escritório" }, { status: 500 });
+    return NextResponse.json({ error: "Erro ao atualizar escritório" }, { status: 500 });
   }
 }

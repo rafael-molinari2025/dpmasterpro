@@ -44,8 +44,28 @@ export async function PATCH(
   try {
     const body = await request.json();
 
-    // Separar campos de certificado do resto
-    const { certificadoPfxBase64, certificadoSenha, certificadoRemover, ...dadosEmpresa } = body;
+    // Separar campos de certificado e extrair apenas os campos permitidos
+    const {
+      certificadoPfxBase64,
+      certificadoSenha,
+      certificadoRemover,
+      razaoSocial,
+      nomeFantasia,
+      inscEstadual,
+      inscMunicipal,
+      cnae,
+      naturezaJuridica,
+      regimeTributario,
+      recolheINSSPatronal,
+      aliquotaRAT,
+      fatorMEI,
+      responsavelNome,
+      responsavelCPF,
+      email,
+      telefone,
+      endereco,
+      ativa,
+    } = body;
 
     let certificadoDigital = empresa.certificadoDigital;
 
@@ -88,13 +108,28 @@ export async function PATCH(
       certificadoDigital = { pfxBase64: certificadoPfxBase64, senha: certificadoSenha, validade, titular };
     }
 
-    // Converter campos numéricos
-    if (dadosEmpresa.aliquotaRAT !== undefined) dadosEmpresa.aliquotaRAT = parseFloat(dadosEmpresa.aliquotaRAT);
-    if (dadosEmpresa.fatorMEI !== undefined) dadosEmpresa.fatorMEI = parseFloat(dadosEmpresa.fatorMEI);
+    // Montar objeto de atualização somente com campos permitidos
+    const dadosUpdate: Record<string, unknown> = { certificadoDigital };
+    if (razaoSocial !== undefined) dadosUpdate.razaoSocial = razaoSocial;
+    if (nomeFantasia !== undefined) dadosUpdate.nomeFantasia = nomeFantasia;
+    if (inscEstadual !== undefined) dadosUpdate.inscEstadual = inscEstadual;
+    if (inscMunicipal !== undefined) dadosUpdate.inscMunicipal = inscMunicipal;
+    if (cnae !== undefined) dadosUpdate.cnae = cnae;
+    if (naturezaJuridica !== undefined) dadosUpdate.naturezaJuridica = naturezaJuridica;
+    if (regimeTributario !== undefined) dadosUpdate.regimeTributario = regimeTributario;
+    if (recolheINSSPatronal !== undefined) dadosUpdate.recolheINSSPatronal = recolheINSSPatronal;
+    if (aliquotaRAT !== undefined) dadosUpdate.aliquotaRAT = parseFloat(aliquotaRAT);
+    if (fatorMEI !== undefined) dadosUpdate.fatorMEI = parseFloat(fatorMEI);
+    if (responsavelNome !== undefined) dadosUpdate.responsavelNome = responsavelNome;
+    if (responsavelCPF !== undefined) dadosUpdate.responsavelCPF = responsavelCPF;
+    if (email !== undefined) dadosUpdate.email = email;
+    if (telefone !== undefined) dadosUpdate.telefone = telefone;
+    if (endereco !== undefined) dadosUpdate.endereco = endereco;
+    if (ativa !== undefined) dadosUpdate.ativa = ativa;
 
     const updated = await db.empresa.update({
       where: { id },
-      data: { ...dadosEmpresa, certificadoDigital },
+      data: dadosUpdate,
     });
 
     const certAtualizado = certificadoPfxBase64 ? "certificado atualizado" : certificadoRemover ? "certificado removido" : null;
@@ -118,6 +153,6 @@ export async function PATCH(
     });
   } catch (error: any) {
     console.error("Erro ao atualizar empresa:", error);
-    return NextResponse.json({ error: error.message ?? "Erro ao atualizar empresa" }, { status: 500 });
+    return NextResponse.json({ error: "Erro ao atualizar empresa" }, { status: 500 });
   }
 }

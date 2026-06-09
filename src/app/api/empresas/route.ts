@@ -27,8 +27,51 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
+    const {
+      razaoSocial,
+      nomeFantasia,
+      cnpj,
+      inscEstadual,
+      inscMunicipal,
+      cnae,
+      naturezaJuridica,
+      regimeTributario,
+      recolheINSSPatronal,
+      aliquotaRAT,
+      fatorMEI,
+      responsavelNome,
+      responsavelCPF,
+      email,
+      telefone,
+      endereco,
+      ativa,
+    } = body;
+
+    if (!razaoSocial || !cnpj) {
+      return NextResponse.json({ error: "Razão Social e CNPJ são obrigatórios" }, { status: 400 });
+    }
+
     const empresa = await db.empresa.create({
-      data: { ...body, escritorioId },
+      data: {
+        escritorioId,
+        razaoSocial,
+        nomeFantasia,
+        cnpj,
+        inscEstadual,
+        inscMunicipal,
+        cnae,
+        naturezaJuridica,
+        regimeTributario,
+        recolheINSSPatronal,
+        aliquotaRAT,
+        fatorMEI,
+        responsavelNome,
+        responsavelCPF,
+        email,
+        telefone,
+        endereco,
+        ativa,
+      },
     });
     await registrarLog({
       escritorioId,

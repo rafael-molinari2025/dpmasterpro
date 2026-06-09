@@ -103,7 +103,7 @@ export async function GET(request: Request) {
         "Content-Disposition": `attachment; filename="backup-dp-${tipo}-${agora}.json"`,
       },
     });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message ?? "Erro ao gerar backup" }, { status: 500 });
+  } catch {
+    return NextResponse.json({ error: "Erro ao gerar backup" }, { status: 500 });
   }
 }

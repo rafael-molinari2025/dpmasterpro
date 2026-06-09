@@ -188,6 +188,6 @@ export async function processarDecimoTerceiro(formData: FormData) {
     redirect("/folha/decimo-terceiro?empresaId=" + empresaId + "&parcela=" + parcela + "&processado=1");
   } catch (err: any) {
     if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
-    redirect("/folha/decimo-terceiro?error=" + encodeURIComponent(String(err?.message ?? "Erro ao processar 13º salário.")));
+    redirect("/folha/decimo-terceiro?error=" + encodeURIComponent("Erro ao processar 13º salário. Verifique os dados e tente novamente."));
   }
 }

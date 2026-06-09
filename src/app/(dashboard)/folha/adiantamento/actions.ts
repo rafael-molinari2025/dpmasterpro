@@ -105,6 +105,6 @@ export async function processarAdiantamento(formData: FormData) {
     redirect("/folha/adiantamento?empresaId=" + empresaId + "&competencia=" + competencia + "&processado=1");
   } catch (err: any) {
     if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
-    redirect("/folha/adiantamento?error=" + encodeURIComponent(String(err?.message ?? "Erro ao processar adiantamento.")));
+    redirect("/folha/adiantamento?error=" + encodeURIComponent("Erro ao processar adiantamento. Verifique os dados e tente novamente."));
   }
 }

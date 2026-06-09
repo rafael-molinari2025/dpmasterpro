@@ -57,7 +57,7 @@ export async function programarFerias(formData: FormData) {
     });
   } catch (err: any) {
     if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
-    redirect("/ferias/nova?error=" + encodeURIComponent(String(err?.message ?? "Erro ao programar férias.")));
+    redirect("/ferias/nova?error=" + encodeURIComponent("Erro ao programar férias. Verifique os dados e tente novamente."));
   }
 
   redirect("/ferias");

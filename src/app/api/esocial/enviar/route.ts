@@ -111,6 +111,6 @@ export async function POST(request: Request) {
       });
     } catch { /* ignore */ }
 
-    return NextResponse.json({ error: error.message ?? "Erro ao transmitir eventos" }, { status: 500 });
+    return NextResponse.json({ error: "Erro ao transmitir eventos eSocial" }, { status: 500 });
   }
 }

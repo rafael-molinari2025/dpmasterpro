@@ -217,6 +217,6 @@ export async function POST(request: Request) {
 
   } catch (error: any) {
     console.error("Erro ao gerar evento eSocial:", error);
-    return NextResponse.json({ error: error.message ?? "Erro ao gerar evento" }, { status: 500 });
+    return NextResponse.json({ error: "Erro ao gerar evento eSocial" }, { status: 500 });
   }
 }

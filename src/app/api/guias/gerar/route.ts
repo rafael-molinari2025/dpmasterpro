@@ -45,7 +45,7 @@ export async function POST(request: Request) {
       guiasCriadas.push(await db.guiaPagamento.create({
         data: {
           empresaId, folhaId, tipo: "FGTS_DIGITAL", competencia, dataVencimento: vencimentoFGTS, valorPrincipal: totalFGTS, valorTotal: totalFGTS,
-          pixCopiaCola: `00020126330014br.gov.fgts.pix0111${empresaId.slice(0, 11)}5204000053039865406${totalFGTS.toFixed(2).replace(".", "")}5802BR5920FGTS Digital${competencia}6009SAO PAULO62070503***6304`,
+          pixCopiaCola: `00020126360014br.gov.fgts.pix0114${empresa.cnpj.replace(/\D/g, "").padEnd(14, "0")}5204000053039865406${totalFGTS.toFixed(2).replace(".", "")}5802BR5920FGTS Digital6009SAO PAULO62070503***6304`,
           status: "PENDENTE",
         },
       }));

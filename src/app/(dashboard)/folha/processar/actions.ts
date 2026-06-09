@@ -198,7 +198,7 @@ export async function processarFolha(formData: FormData) {
   } catch (err: any) {
     // Re-lança redirects do Next.js
     if (err?.digest?.startsWith("NEXT_REDIRECT")) throw err;
-    redirect("/folha/processar?error=" + encodeURIComponent(String(err?.message ?? "Erro ao processar folha.")));
+    redirect("/folha/processar?error=" + encodeURIComponent("Erro ao processar folha. Verifique os dados e tente novamente."));
   }
 
   redirect(`/folha?competencia=${competencia}&empresaId=${empresaId}`);
