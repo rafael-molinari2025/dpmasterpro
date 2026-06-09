@@ -1,8 +1,9 @@
 "use client";
 
-import { Bell, Search, HelpCircle, ChevronDown, Menu, AlertTriangle, AlertCircle, Info, X, CalendarX, FileText, Send } from "lucide-react";
+import { Bell, Search, HelpCircle, ChevronDown, Menu, AlertTriangle, AlertCircle, Info, X, CalendarX, FileText, Send, CheckCheck } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useSidebar } from "./SidebarProvider";
+import { useNotificacoes, type Alerta } from "./NotificacoesProvider";
 import Link from "next/link";
 
 interface HeaderProps {
@@ -10,75 +11,54 @@ interface HeaderProps {
   subtitle?: string;
 }
 
-interface Alerta {
-  id: string;
-  tipo: "ferias" | "guia" | "esocial";
-  nivel: "info" | "aviso" | "critico";
-  titulo: string;
-  descricao: string;
-  link?: string;
-}
+const nivelIcon = { critico: AlertCircle, aviso: AlertTriangle, info: Info };
+const nivelCor  = { critico: "text-red-500", aviso: "text-amber-500", info: "text-blue-500" };
+const tipoCor   = { ferias: "bg-orange-50", guia: "bg-amber-50", esocial: "bg-red-50" };
+const tipoIcon  = { ferias: CalendarX, guia: FileText, esocial: Send };
 
-const nivelIcon = {
-  critico: AlertCircle,
-  aviso: AlertTriangle,
-  info: Info,
-};
-const nivelCor = {
-  critico: "text-red-500",
-  aviso: "text-amber-500",
-  info: "text-blue-500",
-};
-const tipoCor = {
-  ferias: "bg-orange-50 border-orange-100",
-  guia: "bg-amber-50 border-amber-100",
-  esocial: "bg-red-50 border-red-100",
-};
-const tipoIcon = {
-  ferias: CalendarX,
-  guia: FileText,
-  esocial: Send,
-};
+function AlertaItem({ a, onLer }: { a: Alerta; onLer: (id: string) => void }) {
+  const NivelIcon = nivelIcon[a.nivel];
+  const TipoIcon  = tipoIcon[a.tipo];
+
+  const inner = (
+    <div
+      className={`px-4 py-3 flex gap-3 hover:brightness-95 transition-all cursor-pointer ${tipoCor[a.tipo]}`}
+      onClick={() => onLer(a.id)}
+    >
+      <TipoIcon className={`w-4 h-4 flex-shrink-0 mt-0.5 ${nivelCor[a.nivel]}`} />
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1">
+          <NivelIcon className={`w-3 h-3 flex-shrink-0 ${nivelCor[a.nivel]}`} />
+          <p className="text-xs font-semibold text-gray-900 leading-tight truncate">{a.titulo}</p>
+        </div>
+        <p className="text-xs text-gray-500 mt-0.5 truncate">{a.descricao}</p>
+      </div>
+    </div>
+  );
+
+  return a.link ? (
+    <Link href={a.link}>{inner}</Link>
+  ) : (
+    <div>{inner}</div>
+  );
+}
 
 export default function Header({ title, subtitle }: HeaderProps) {
   const [empresa] = useState("Empresa Exemplo Ltda");
   const { toggle } = useSidebar();
+  const { alertas, lidos, naoLidos, carregando, marcarLido, marcarTodosLidos } = useNotificacoes();
 
-  const [abrirSino, setAbrirSino] = useState(false);
-  const [alertas, setAlertas] = useState<Alerta[]>([]);
-  const [carregando, setCarregando] = useState(false);
-  const [carregado, setCarregado] = useState(false);
-  const sinoRef = useRef<HTMLDivElement>(null);
+  const [aberto, setAberto] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
 
   // Fecha ao clicar fora
   useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (sinoRef.current && !sinoRef.current.contains(e.target as Node)) {
-        setAbrirSino(false);
-      }
+    function handle(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setAberto(false);
     }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
+    document.addEventListener("mousedown", handle);
+    return () => document.removeEventListener("mousedown", handle);
   }, []);
-
-  async function toggleSino() {
-    setAbrirSino((v) => !v);
-    if (!carregado) {
-      setCarregando(true);
-      try {
-        const res = await fetch("/api/notificacoes");
-        const data = await res.json();
-        setAlertas(data.alertas ?? []);
-        setCarregado(true);
-      } catch {
-        setAlertas([]);
-      } finally {
-        setCarregando(false);
-      }
-    }
-  }
-
-  const total = alertas.length;
 
   return (
     <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6 flex-shrink-0 print:hidden">
@@ -112,44 +92,53 @@ export default function Header({ title, subtitle }: HeaderProps) {
         </button>
 
         {/* Notifications */}
-        <div ref={sinoRef} className="relative">
+        <div ref={ref} className="relative">
           <button
-            onClick={toggleSino}
+            onClick={() => setAberto((v) => !v)}
             className={`relative w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${
-              abrirSino ? "bg-gray-100 text-gray-700" : "text-gray-500 hover:bg-gray-100"
+              aberto ? "bg-gray-100 text-gray-700" : "text-gray-500 hover:bg-gray-100"
             }`}
             aria-label="Notificações"
           >
             <Bell className="w-4 h-4" />
-            {(carregado ? total > 0 : true) && (
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+            {naoLidos > 0 && (
+              <span className="absolute top-0.5 right-0.5 min-w-[16px] h-4 px-0.5 bg-red-500 rounded-full flex items-center justify-center text-[10px] font-bold text-white leading-none">
+                {naoLidos > 9 ? "9+" : naoLidos}
+              </span>
             )}
           </button>
 
-          {abrirSino && (
+          {aberto && (
             <div className="absolute right-0 top-10 w-80 sm:w-96 bg-white rounded-xl border border-gray-200 shadow-lg z-50 overflow-hidden">
-              {/* Header do dropdown */}
-              <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+              {/* Cabeçalho */}
+              <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-gray-50">
                 <div>
                   <p className="text-sm font-semibold text-gray-900">Notificações</p>
-                  {carregado && (
-                    <p className="text-xs text-gray-400 mt-0.5">
-                      {total === 0 ? "Nenhum alerta no momento" : `${total} alerta${total !== 1 ? "s" : ""}`}
-                    </p>
-                  )}
+                  <p className="text-xs text-gray-400">
+                    {carregando ? "Carregando..." : naoLidos === 0 ? "Tudo lido" : `${naoLidos} não lida${naoLidos !== 1 ? "s" : ""}`}
+                  </p>
                 </div>
-                <button
-                  onClick={() => setAbrirSino(false)}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-2">
+                  {naoLidos > 0 && (
+                    <button
+                      onClick={marcarTodosLidos}
+                      className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 transition-colors"
+                      title="Marcar todas como lidas"
+                    >
+                      <CheckCheck className="w-3.5 h-3.5" />
+                      Ler tudo
+                    </button>
+                  )}
+                  <button onClick={() => setAberto(false)} className="text-gray-400 hover:text-gray-600 ml-1">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
 
-              {/* Conteúdo */}
-              <div className="max-h-96 overflow-y-auto">
+              {/* Lista */}
+              <div className="max-h-[360px] overflow-y-auto">
                 {carregando ? (
-                  <div className="py-10 text-center text-sm text-gray-400">Carregando...</div>
+                  <div className="py-10 text-center text-sm text-gray-400">Carregando alertas...</div>
                 ) : alertas.length === 0 ? (
                   <div className="py-10 text-center">
                     <Bell className="w-8 h-8 text-gray-200 mx-auto mb-2" />
@@ -157,45 +146,26 @@ export default function Header({ title, subtitle }: HeaderProps) {
                     <p className="text-xs text-gray-300 mt-1">Tudo em dia!</p>
                   </div>
                 ) : (
-                  <div className="divide-y divide-gray-50">
-                    {alertas.map((a) => {
-                      const NivelIcon = nivelIcon[a.nivel];
-                      const TipoIcon = tipoIcon[a.tipo];
-                      const content = (
-                        <div className={`px-4 py-3 flex gap-3 hover:bg-gray-50 transition-colors ${tipoCor[a.tipo]}`}>
-                          <div className="flex-shrink-0 mt-0.5">
-                            <TipoIcon className={`w-4 h-4 ${nivelCor[a.nivel]}`} />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start gap-1.5">
-                              <NivelIcon className={`w-3 h-3 mt-0.5 flex-shrink-0 ${nivelCor[a.nivel]}`} />
-                              <p className="text-xs font-semibold text-gray-900 leading-tight">{a.titulo}</p>
-                            </div>
-                            <p className="text-xs text-gray-500 mt-0.5 truncate">{a.descricao}</p>
-                          </div>
-                        </div>
-                      );
-                      return a.link ? (
-                        <Link key={a.id} href={a.link} onClick={() => setAbrirSino(false)}>
-                          {content}
-                        </Link>
-                      ) : (
-                        <div key={a.id}>{content}</div>
-                      );
-                    })}
+                  <div className="divide-y divide-gray-100">
+                    {alertas.map((a) => (
+                      <div key={a.id} className={lidos.has(a.id) ? "opacity-50" : ""}>
+                        <AlertaItem a={a} onLer={(id) => { marcarLido(id); setAberto(false); }} />
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
 
-              {/* Footer */}
-              {carregado && alertas.length > 0 && (
-                <div className="border-t border-gray-100 px-4 py-2.5">
+              {/* Rodapé */}
+              {alertas.length > 0 && (
+                <div className="border-t border-gray-100 px-4 py-2.5 flex items-center justify-between bg-gray-50">
+                  <span className="text-xs text-gray-400">{alertas.length} alerta{alertas.length !== 1 ? "s" : ""} no total</span>
                   <Link
                     href="/configuracoes/notificacoes"
-                    onClick={() => setAbrirSino(false)}
+                    onClick={() => setAberto(false)}
                     className="text-xs text-blue-600 hover:text-blue-800 transition-colors"
                   >
-                    Configurar notificações →
+                    Configurar →
                   </Link>
                 </div>
               )}
