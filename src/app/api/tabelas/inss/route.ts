@@ -23,11 +23,22 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { ano, faixas, teto, salarioMinimo } = body;
-    if (!ano || !faixas) {
-      return NextResponse.json({ error: "Campos obrigatórios: ano, faixas" }, { status: 400 });
+    const { ano, vigencia, faixas, tetoContribuicao, salarioMinimo } = body;
+    if (!ano || !faixas || !Array.isArray(faixas) || faixas.length === 0) {
+      return NextResponse.json({ error: "Campos obrigatórios: ano, faixas (array)" }, { status: 400 });
     }
-    const tabela = await db.tabelaINSS.create({ data: { ano, faixas, teto, salarioMinimo } });
+    if (!tetoContribuicao || !salarioMinimo) {
+      return NextResponse.json({ error: "Campos obrigatórios: tetoContribuicao, salarioMinimo" }, { status: 400 });
+    }
+    const tabela = await db.tabelaINSS.create({
+      data: {
+        ano,
+        vigencia: vigencia ? new Date(vigencia) : new Date(`${ano}-01-01`),
+        faixas,
+        tetoContribuicao,
+        salarioMinimo,
+      },
+    });
     return NextResponse.json(tabela, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Erro ao criar tabela" }, { status: 500 });

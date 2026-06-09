@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
       allowedOrigins: ["dpmasterpro.primetitec.com.br", "localhost:3000"],
     },
   },
-  serverExternalPackages: ["xlsx", "node-forge", "nodemailer"],
+  serverExternalPackages: ["xlsx", "node-forge", "nodemailer", "bcryptjs"],
   async headers() {
     return [
       {

@@ -64,6 +64,10 @@ export function NotificacoesProvider({ children }: { children: React.ReactNode }
     setCarregando(true);
     try {
       const res = await fetch("/api/notificacoes");
+      if (!res.ok) {
+        setAlertas([]);
+        return;
+      }
       const data = await res.json();
       setAlertas(data.alertas ?? []);
       carregadoRef.current = true;
