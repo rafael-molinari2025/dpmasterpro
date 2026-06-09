@@ -50,7 +50,7 @@ export default function ImportacaoPage() {
   return (
     <>
       <Header title="Importação de Dados" subtitle="Migre dados de outros sistemas ou planilhas" />
-      <div className="flex-1 p-6 space-y-6">
+      <div className="flex-1 p-3 sm:p-6 space-y-6">
 
         {/* Format Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -103,7 +103,8 @@ export default function ImportacaoPage() {
           <div className="px-5 py-4 border-b border-gray-100">
             <h2 className="font-semibold text-gray-900">Histórico de Importações</h2>
           </div>
-          <table className="w-full">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[500px]">
             <thead className="bg-gray-50">
               <tr>
                 <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Arquivo</th>
@@ -135,6 +136,7 @@ export default function ImportacaoPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
 
       </div>

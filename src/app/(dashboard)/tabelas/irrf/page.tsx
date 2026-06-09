@@ -55,7 +55,8 @@ export default function TabelaIRRFPage() {
               <h2 className="font-semibold text-gray-900">Tabela Progressiva IRRF 2026</h2>
               <p className="text-xs text-gray-500 mt-0.5">Base: salário bruto − INSS − (dependentes × R$ 189,59)</p>
             </div>
-            <table className="w-full">
+            <div className="overflow-x-auto">
+            <table className="w-full min-w-[400px]">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Base de Cálculo (mensal)</th>
@@ -77,6 +78,7 @@ export default function TabelaIRRFPage() {
                 ))}
               </tbody>
             </table>
+            </div>
             <div className="px-5 py-3 bg-amber-50 border-t border-amber-100">
               <p className="text-xs text-amber-800">
                 <strong>Redutor adicional:</strong> Para base entre R$ 5.000,01 e R$ 7.350,00, aplica-se redução proporcional

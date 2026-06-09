@@ -155,7 +155,7 @@ export default function TabelaINSSPage() {
             <Calculator className="w-5 h-5 text-blue-600" />
             <h2 className="font-semibold text-gray-900">Simulador de Encargos</h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
             <div>
               <label className="text-xs text-gray-500 block mb-1">Salário Bruto (R$)</label>
               <input

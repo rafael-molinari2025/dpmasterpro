@@ -47,21 +47,21 @@ export default async function RubricasPage({
   return (
     <>
       <Header title="Rubricas" subtitle="Configuração de eventos de folha e vinculação com o eSocial" />
-      <div className="flex-1 p-6 space-y-6">
+      <div className="flex-1 p-3 sm:p-6 space-y-6">
 
-        <form method="GET" className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <form method="GET" className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-wrap">
             <input
               type="text"
               name="q"
               defaultValue={q ?? ""}
               placeholder="Buscar rubrica..."
-              className="pl-4 pr-4 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
+              className="pl-4 pr-4 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-64"
             />
             <select
               name="tipo"
               defaultValue={tipo ?? ""}
-              className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"
             >
               <option value="">Todos os tipos</option>
               <option value="PROVENTO">Proventos</option>
@@ -69,11 +69,11 @@ export default async function RubricasPage({
               <option value="INFORMATIVO">Informativos</option>
               <option value="BASE_CALCULO">Base de Cálculo</option>
             </select>
-            <button type="submit" className="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">
+            <button type="submit" className="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 w-full sm:w-auto">
               Filtrar
             </button>
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors">
+          <button className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors">
             <Plus className="w-4 h-4" />
             Nova Rubrica
           </button>

@@ -133,21 +133,21 @@ export default async function HoleritePage({
         {/* Filtros */}
         <form method="GET" className="bg-white rounded-xl border border-gray-200 p-4">
           <div className="flex flex-wrap items-end gap-3">
-            <div>
+            <div className="w-full sm:w-auto">
               <label className="text-xs text-gray-500 block mb-1">Competência</label>
               <input
                 type="month"
                 name="competencia"
                 defaultValue={competencia}
-                className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            <div>
+            <div className="w-full sm:w-auto">
               <label className="text-xs text-gray-500 block mb-1">Empresa</label>
               <select
                 name="empresaId"
                 defaultValue={empresaId ?? ""}
-                className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Selecione...</option>
                 {empresas.map((e) => (
@@ -156,12 +156,12 @@ export default async function HoleritePage({
               </select>
             </div>
             {funcionarios.length > 0 && (
-              <div>
+              <div className="w-full sm:w-auto">
                 <label className="text-xs text-gray-500 block mb-1">Funcionário (opcional)</label>
                 <select
                   name="funcionarioId"
                   defaultValue={funcionarioId ?? ""}
-                  className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Todos</option>
                   {funcionarios.map((f) => (

@@ -89,7 +89,7 @@ export default async function AdiantamentoPage({
             <select
               name="empresaId"
               defaultValue={empresaId ?? ""}
-              className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"
             >
               <option value="">Selecione uma empresa</option>
               {empresas.map((e) => (
@@ -100,7 +100,7 @@ export default async function AdiantamentoPage({
               type="month"
               name="competencia"
               defaultValue={competencia}
-              className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"
             />
             <div className="flex items-center gap-2">
               <label className="text-sm text-gray-600">Percentual:</label>
@@ -181,7 +181,8 @@ export default async function AdiantamentoPage({
             </div>
           ) : (
             <>
-              <table className="w-full">
+              <div className="overflow-x-auto">
+              <table className="w-full min-w-[550px]">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
                     <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Matrícula</th>
@@ -212,6 +213,7 @@ export default async function AdiantamentoPage({
                   </tr>
                 </tfoot>
               </table>
+              </div>
               <div className="px-5 py-3 border-t border-gray-100 bg-amber-50">
                 <p className="text-xs text-amber-800">
                   <strong>Atenção:</strong> O adiantamento não sofre desconto de INSS ou IRRF. Será deduzido automaticamente na folha mensal.

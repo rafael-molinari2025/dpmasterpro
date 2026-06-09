@@ -135,7 +135,7 @@ export default async function DecimoTerceiroPage({
             <select
               name="empresaId"
               defaultValue={empresaId ?? ""}
-              className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"
             >
               <option value="">Selecione uma empresa</option>
               {empresas.map((e) => (
@@ -147,14 +147,14 @@ export default async function DecimoTerceiroPage({
             <select
               name="parcela"
               defaultValue={parcela}
-              className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"
             >
               <option value="1">1ª Parcela — Adiantamento (50%)</option>
               <option value="2">2ª Parcela — com INSS e IRRF</option>
             </select>
             <button
               type="submit"
-              className="px-3 py-2 border border-gray-200 bg-white rounded-lg text-sm text-gray-600 hover:bg-gray-50"
+              className="px-3 py-2 border border-gray-200 bg-white rounded-lg text-sm text-gray-600 hover:bg-gray-50 w-full sm:w-auto"
             >
               Calcular
             </button>

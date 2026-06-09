@@ -52,7 +52,7 @@ export default async function ESocialPage({
   return (
     <>
       <Header title="eSocial" subtitle={`Envio e monitoramento de eventos — S-1.3 • ${ambiente}`} />
-      <div className="flex-1 p-6 space-y-6">
+      <div className="flex-1 p-3 sm:p-6 space-y-6">
 
         {/* Contadores */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -71,11 +71,11 @@ export default async function ESocialPage({
 
         {/* Filtros + Ações */}
         <div className="flex flex-col gap-3">
-          <form method="GET" className="flex items-center gap-2 flex-wrap">
+          <form method="GET" className="flex flex-col sm:flex-row sm:items-center gap-2 flex-wrap">
             <select
               name="empresaId"
               defaultValue={filtroEmpresa ?? ""}
-              className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-600"
+              className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-600 w-full sm:w-auto"
             >
               <option value="">Todas as empresas</option>
               {empresas.map((e) => (
@@ -85,7 +85,7 @@ export default async function ESocialPage({
             <select
               name="tipo"
               defaultValue={tipo ?? ""}
-              className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-600"
+              className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-600 w-full sm:w-auto"
             >
               <option value="">Todos os eventos</option>
               {["S-1000","S-1010","S-1200","S-1299","S-2200","S-2299"].map((t) => (
@@ -95,14 +95,14 @@ export default async function ESocialPage({
             <select
               name="status"
               defaultValue={status ?? ""}
-              className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-600"
+              className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-600 w-full sm:w-auto"
             >
               <option value="">Todos os status</option>
               <option value="PENDENTE">Pendente</option>
               <option value="ENVIADO">Enviado</option>
               <option value="ERRO">Erro</option>
             </select>
-            <button type="submit" className="px-3 py-2 border border-gray-200 bg-white rounded-lg text-sm text-gray-600 hover:bg-gray-50">
+            <button type="submit" className="px-3 py-2 border border-gray-200 bg-white rounded-lg text-sm text-gray-600 hover:bg-gray-50 w-full sm:w-auto">
               Filtrar
             </button>
           </form>
@@ -125,7 +125,8 @@ export default async function ESocialPage({
             </div>
           ) : (
             <>
-              <table className="w-full">
+              <div className="overflow-x-auto">
+              <table className="w-full min-w-[750px]">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
                     <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Evento</th>
@@ -200,6 +201,7 @@ export default async function ESocialPage({
                   })}
                 </tbody>
               </table>
+              </div>
               <div className="px-5 py-3 border-t border-gray-100 flex items-center justify-between">
                 <p className="text-xs text-gray-500">
                   {eventos.length} evento{eventos.length !== 1 ? "s" : ""} • Ambiente: {ambiente}
