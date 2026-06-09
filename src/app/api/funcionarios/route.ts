@@ -10,8 +10,12 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url);
   const empresaId = searchParams.get("empresaId");
-  const situacao = searchParams.get("situacao");
+  const situacaoRaw = searchParams.get("situacao");
   const q = searchParams.get("q");
+
+  const SITUACOES_VALIDAS = ["ATIVO", "FERIAS", "AFASTADO", "DEMITIDO"] as const;
+  type Situacao = typeof SITUACOES_VALIDAS[number];
+  const situacao = SITUACOES_VALIDAS.includes(situacaoRaw as Situacao) ? (situacaoRaw as Situacao) : null;
 
   try {
     if (empresaId) {
@@ -23,7 +27,7 @@ export async function GET(request: Request) {
       where: {
         empresa: { escritorioId },
         ...(empresaId && { empresaId }),
-        ...(situacao && { situacao: situacao as any }),
+        ...(situacao && { situacao }),
         ...(q && {
           OR: [
             { nome: { contains: q, mode: "insensitive" } },

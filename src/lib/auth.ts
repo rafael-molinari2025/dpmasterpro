@@ -4,8 +4,10 @@ import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { getPermissoes } from "@/lib/permissoes";
 import { registrarLog } from "@/lib/logger";
+import { authConfig } from "@/lib/auth.config";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  ...authConfig,
   providers: [
     Credentials({
       name: "credentials",
@@ -86,28 +88,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.escritorioId = (user as any).escritorioId;
-        token.perfil = (user as any).perfil;
-        token.permissoes = (user as any).permissoes;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (token) {
-        session.user.id = token.sub!;
-        (session.user as any).escritorioId = token.escritorioId;
-        (session.user as any).perfil = token.perfil;
-        (session.user as any).permissoes = token.permissoes ?? [];
-      }
-      return session;
-    },
-  },
-  pages: {
-    signIn: "/login",
-    error: "/login",
-  },
-  session: { strategy: "jwt" },
 });
