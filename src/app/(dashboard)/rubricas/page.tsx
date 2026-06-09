@@ -27,16 +27,19 @@ export default async function RubricasPage({
   const escritorioId = (session.user as any).escritorioId as string;
   const { tipo, q } = await searchParams;
 
+  const empresaIds = await db.empresa
+    .findMany({ where: { escritorioId }, select: { id: true } })
+    .then((e) => e.map((x) => x.id));
+
   const rubricas = await db.rubrica.findMany({
     where: {
-      OR: [{ global: true }, { empresa: { escritorioId } }],
-      ...(tipo && { tipo: tipo as any }),
-      ...(q && {
-        OR: [
-          { descricao: { contains: q, mode: "insensitive" } },
-          { codigo: { contains: q } },
-        ],
-      }),
+      AND: [
+        { OR: [{ global: true }, { empresaId: { in: empresaIds } }] },
+        ...(tipo ? [{ tipo: tipo as any }] : []),
+        ...(q
+          ? [{ OR: [{ descricao: { contains: q, mode: "insensitive" } }, { codigo: { contains: q } }] }]
+          : []),
+      ],
     },
     orderBy: [{ tipo: "asc" }, { codigo: "asc" }],
   });
