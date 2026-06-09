@@ -13,7 +13,7 @@ export default function ConfiguracoesPage() {
             {
               icon: Building2, title: "Dados do Escritório",
               desc: "CNPJ, razão social, endereço, contato e logotipo.",
-              color: "blue", href: null,
+              color: "blue", href: "/configuracoes/escritorio",
             },
             {
               icon: Users, title: "Usuários e Perfis",
@@ -23,12 +23,12 @@ export default function ConfiguracoesPage() {
             {
               icon: Key, title: "Certificado Digital",
               desc: "Importe e gerencie o certificado A1/A3 para assinatura do eSocial.",
-              color: "amber", href: null,
+              color: "amber", href: "/configuracoes/certificado",
             },
             {
               icon: Globe, title: "eSocial — Ambiente",
               desc: "Alterne entre Homologação e Produção. Credenciais e proxy.",
-              color: "green", href: null,
+              color: "green", href: "/configuracoes/esocial",
             },
             {
               icon: Bell, title: "Notificações",
@@ -53,7 +53,7 @@ export default function ConfiguracoesPage() {
             {
               icon: Shield, title: "Segurança",
               desc: "Políticas de senha, sessão, 2FA e log de acessos.",
-              color: "rose", href: null,
+              color: "rose", href: "/configuracoes/seguranca",
             },
           ].map((card) => {
             const Icon = card.icon;

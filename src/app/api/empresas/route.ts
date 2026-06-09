@@ -9,11 +9,46 @@ export async function GET() {
   const { escritorioId } = guard.session;
 
   try {
-    const empresas = await db.empresa.findMany({
+    const rows = await db.empresa.findMany({
       where: { escritorioId },
-      include: { _count: { select: { funcionarios: true } } },
+      select: {
+        id: true,
+        escritorioId: true,
+        razaoSocial: true,
+        nomeFantasia: true,
+        cnpj: true,
+        inscEstadual: true,
+        inscMunicipal: true,
+        cnae: true,
+        naturezaJuridica: true,
+        regimeTributario: true,
+        recolheINSSPatronal: true,
+        aliquotaRAT: true,
+        fatorMEI: true,
+        responsavelNome: true,
+        responsavelCPF: true,
+        email: true,
+        telefone: true,
+        endereco: true,
+        ativa: true,
+        createdAt: true,
+        updatedAt: true,
+        certificadoDigital: true,
+        _count: { select: { funcionarios: true } },
+      },
       orderBy: { razaoSocial: "asc" },
     });
+
+    const empresas = rows.map(({ certificadoDigital, ...rest }) => {
+      const cert = certificadoDigital as Record<string, unknown> | null;
+      return {
+        ...rest,
+        certificadoInfo: cert
+          ? { configurado: true, validade: cert.validade ?? null, tipo: cert.tipo ?? null }
+          : { configurado: false },
+      };
+    });
+
     return NextResponse.json(empresas);
   } catch {
     return NextResponse.json({ error: "Erro ao buscar empresas" }, { status: 500 });
