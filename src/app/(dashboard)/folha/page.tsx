@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 import Header from "@/components/layout/Header";
+import Link from "next/link";
 import { Play, Lock, Send, Download, Plus, AlertCircle, CheckCircle, Clock } from "lucide-react";
 
 function fmt(v: number) {
@@ -58,39 +59,38 @@ export default async function FolhaPage({
   return (
     <>
       <Header title="Folha de Pagamento" subtitle={`Competência: ${labelCap}`} />
-      <div className="flex-1 p-6 space-y-6">
+      <div className="flex-1 p-3 sm:p-6 space-y-6">
 
-        <form method="GET" className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <form method="GET" className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
             <input
               type="month"
               name="competencia"
               defaultValue={competencia}
-              className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"
             />
             <select
               name="empresaId"
               defaultValue={empresaId ?? ""}
-              className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"
             >
               <option value="">Todas as empresas</option>
               {empresas.map((e) => (
                 <option key={e.id} value={e.id}>{e.nomeFantasia ?? e.razaoSocial}</option>
               ))}
             </select>
-            <button type="submit" className="px-3 py-2 border border-gray-200 bg-white rounded-lg text-sm text-gray-600 hover:bg-gray-50">
+            <button type="submit" className="px-3 py-2 border border-gray-200 bg-white rounded-lg text-sm text-gray-600 hover:bg-gray-50 w-full sm:w-auto">
               Filtrar
             </button>
           </div>
           <div className="flex items-center gap-2">
-            <button className="flex items-center gap-2 px-3 py-2 border border-gray-200 bg-white rounded-lg text-sm text-gray-600 hover:bg-gray-50">
-              <Download className="w-4 h-4" />
-              Exportar
-            </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition-colors">
+            <Link
+              href={`/folha/processar${empresaId ? `?empresaId=${empresaId}` : ""}`}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition-colors"
+            >
               <Play className="w-4 h-4" />
               Processar Folha
-            </button>
+            </Link>
           </div>
         </form>
 
@@ -128,10 +128,13 @@ export default async function FolhaPage({
               <p className="text-sm text-gray-500 max-w-sm">
                 Clique em "Processar Folha" para calcular proventos e descontos de {labelCap}.
               </p>
-              <button className="mt-4 flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors">
+              <Link
+                href="/folha/processar"
+                className="mt-4 flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
+              >
                 <Play className="w-4 h-4" />
                 Processar Folha
-              </button>
+              </Link>
             </div>
           ) : (
             <table className="w-full">

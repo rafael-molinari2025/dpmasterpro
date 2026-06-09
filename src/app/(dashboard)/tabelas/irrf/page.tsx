@@ -1,7 +1,9 @@
-import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
+"use client";
+
+import { useState } from "react";
 import Header from "@/components/layout/Header";
 import { Info, Calculator } from "lucide-react";
+import { calcularINSS, calcularIRRF } from "@/lib/calculo-folha";
 
 const tabelaIRRF2026 = [
   { base: "Até R$ 2.259,20", aliquota: "Isento", deducao: "—" },
@@ -11,14 +13,29 @@ const tabelaIRRF2026 = [
   { base: "Acima de R$ 4.664,69", aliquota: "27,5%", deducao: "R$ 896,00" },
 ];
 
-export default async function TabelaIRRFPage() {
-  const session = await auth();
-  if (!session?.user) redirect("/login");
+function fmt(v: number) {
+  return v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+export default function TabelaIRRFPage() {
+  const [salario, setSalario] = useState("");
+  const [deps, setDeps] = useState("0");
+  const [resultado, setResultado] = useState<{ inss: number; baseIRRF: number; irrf: number } | null>(null);
+
+  function calcular() {
+    const sal = parseFloat(salario.replace(",", ".")) || 0;
+    const numDeps = parseInt(deps) || 0;
+    if (sal <= 0) return;
+    const inss = calcularINSS(sal);
+    const baseIRRF = Math.max(0, sal - inss - numDeps * 189.59);
+    const irrf = calcularIRRF(sal - inss, numDeps);
+    setResultado({ inss, baseIRRF, irrf });
+  }
 
   return (
     <>
       <Header title="Tabela IRRF 2026" subtitle="Lei nº 15.270/2025 — vigência a partir de janeiro/2026" />
-      <div className="flex-1 p-6 space-y-6">
+      <div className="flex-1 p-3 sm:p-6 space-y-6">
 
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-3">
           <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
@@ -68,33 +85,88 @@ export default async function TabelaIRRFPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
-            <div className="flex items-center gap-2">
-              <Calculator className="w-5 h-5 text-blue-600" />
-              <h2 className="font-semibold text-gray-900">Deduções Permitidas</h2>
-            </div>
-            <div className="space-y-3">
-              {[
-                { item: "Dependente", valor: "R$ 189,59/mês por dependente" },
-                { item: "INSS retido", valor: "Valor total descontado na competência" },
-                { item: "Pensão alimentícia judicial", valor: "Valor determinado judicialmente" },
-                { item: "Contribuição previdenciária do servidor", valor: "Valor das contribuições" },
-                { item: "Despesas com instrução (Declaração)", valor: "Até R$ 3.561,50/ano" },
-                { item: "Despesas médicas (Declaração)", valor: "Sem limite" },
-              ].map((d) => (
-                <div key={d.item} className="flex items-start justify-between gap-4 py-2 border-b border-gray-100 last:border-0">
-                  <span className="text-sm text-gray-700">{d.item}</span>
-                  <span className="text-sm text-gray-600 text-right flex-shrink-0">{d.valor}</span>
+          <div className="space-y-6">
+            {/* Calculadora */}
+            <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
+              <div className="flex items-center gap-2">
+                <Calculator className="w-5 h-5 text-blue-600" />
+                <h2 className="font-semibold text-gray-900">Calcular IRRF</h2>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs text-gray-500 block mb-1">Salário Bruto (R$)</label>
+                  <input
+                    type="number"
+                    value={salario}
+                    onChange={(e) => setSalario(e.target.value)}
+                    placeholder="Ex: 4500,00"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
                 </div>
-              ))}
+                <div>
+                  <label className="text-xs text-gray-500 block mb-1">Dependentes</label>
+                  <input
+                    type="number"
+                    value={deps}
+                    onChange={(e) => setDeps(e.target.value)}
+                    min="0"
+                    max="20"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+              <button
+                onClick={calcular}
+                className="w-full px-4 py-2.5 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors font-medium"
+              >
+                Calcular
+              </button>
+
+              {resultado && (
+                <div className="bg-gray-50 rounded-xl p-4 space-y-2 border border-gray-200">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Salário Bruto:</span>
+                    <span className="font-medium">R$ {fmt(parseFloat(salario.replace(",", ".")) || 0)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">(-) INSS:</span>
+                    <span className="font-medium text-red-600">R$ {fmt(resultado.inss)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">(-) Dependentes ({deps} × R$ 189,59):</span>
+                    <span className="font-medium text-red-600">R$ {fmt((parseInt(deps) || 0) * 189.59)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm border-t border-gray-200 pt-2">
+                    <span className="text-gray-600">Base de Cálculo IRRF:</span>
+                    <span className="font-medium">R$ {fmt(resultado.baseIRRF)}</span>
+                  </div>
+                  <div className="flex justify-between font-bold border-t border-gray-200 pt-2">
+                    <span className={resultado.irrf === 0 ? "text-green-700" : "text-red-700"}>
+                      {resultado.irrf === 0 ? "✓ Isento de IRRF" : "IRRF Retido:"}
+                    </span>
+                    <span className={resultado.irrf === 0 ? "text-green-700 text-lg" : "text-red-700 text-lg"}>
+                      {resultado.irrf === 0 ? "R$ 0,00" : `R$ ${fmt(resultado.irrf)}`}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
 
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <p className="text-sm font-medium text-gray-700 mb-2">Fórmula do cálculo:</p>
-              <div className="bg-gray-50 rounded-lg p-3 font-mono text-xs text-gray-700 space-y-1">
-                <p>Base = Salário Bruto − INSS − (Dependentes × 189,59)</p>
-                <p>IR = Base × Alíquota − Parcela a deduzir</p>
-                <p className="text-blue-600">Se Base ≤ 5.000,00 → IR = 0</p>
+            <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
+              <h2 className="font-semibold text-gray-900">Deduções Permitidas</h2>
+              <div className="space-y-2">
+                {[
+                  { item: "Dependente", valor: "R$ 189,59/mês por dependente" },
+                  { item: "INSS retido", valor: "Valor total descontado na competência" },
+                  { item: "Pensão alimentícia judicial", valor: "Valor determinado judicialmente" },
+                  { item: "Despesas com instrução (Declaração)", valor: "Até R$ 3.561,50/ano" },
+                  { item: "Despesas médicas (Declaração)", valor: "Sem limite" },
+                ].map((d) => (
+                  <div key={d.item} className="flex items-start justify-between gap-4 py-2 border-b border-gray-100 last:border-0">
+                    <span className="text-sm text-gray-700">{d.item}</span>
+                    <span className="text-sm text-gray-600 text-right flex-shrink-0">{d.valor}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

@@ -2,7 +2,8 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 import Header from "@/components/layout/Header";
-import { Info, Play, Download, DollarSign, Users, Calculator } from "lucide-react";
+import { Info, Play, DollarSign, Users, Calculator, CheckCircle, AlertCircle } from "lucide-react";
+import { processarAdiantamento } from "./actions";
 
 function fmt(v: number) {
   return v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -11,12 +12,15 @@ function fmt(v: number) {
 export default async function AdiantamentoPage({
   searchParams,
 }: {
-  searchParams: Promise<{ empresaId?: string; percentual?: string }>;
+  searchParams: Promise<{ empresaId?: string; percentual?: string; competencia?: string; processado?: string; error?: string }>;
 }) {
   const session = await auth();
   if (!session?.user) redirect("/login");
   const escritorioId = (session.user as any).escritorioId as string;
-  const { empresaId, percentual = "40" } = await searchParams;
+
+  const hoje = new Date();
+  const competenciaDefault = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}`;
+  const { empresaId, percentual = "40", competencia = competenciaDefault, processado, error } = await searchParams;
 
   const pct = Math.min(100, Math.max(1, parseInt(percentual) || 40));
 
@@ -48,13 +52,26 @@ export default async function AdiantamentoPage({
   const totalAdiantamento = adiantamentos.reduce((s, a) => s + a.valorAdiantamento, 0);
   const totalSalarios = adiantamentos.reduce((s, a) => s + a.salario, 0);
 
-  const hoje = new Date();
-  const mesLabel = hoje.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+  const mesLabel = new Date(competencia + "-01").toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
 
   return (
     <>
       <Header title="Adiantamento Salarial" subtitle={`Quinzenal — ${mesLabel.charAt(0).toUpperCase() + mesLabel.slice(1)}`} />
-      <div className="flex-1 p-6 space-y-6">
+      <div className="flex-1 p-3 sm:p-6 space-y-6">
+
+        {processado === "1" && (
+          <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex gap-3">
+            <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-green-800">Adiantamento processado com sucesso! Os registros foram criados na folha.</p>
+          </div>
+        )}
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex gap-3">
+            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-red-700">{decodeURIComponent(error)}</p>
+          </div>
+        )}
 
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-3">
           <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
@@ -67,8 +84,8 @@ export default async function AdiantamentoPage({
           </div>
         </div>
 
-        <form method="GET" className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <form method="GET" className="flex flex-wrap items-center gap-3">
             <select
               name="empresaId"
               defaultValue={empresaId ?? ""}
@@ -79,6 +96,12 @@ export default async function AdiantamentoPage({
                 <option key={e.id} value={e.id}>{e.nomeFantasia ?? e.razaoSocial}</option>
               ))}
             </select>
+            <input
+              type="month"
+              name="competencia"
+              defaultValue={competencia}
+              className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
             <div className="flex items-center gap-2">
               <label className="text-sm text-gray-600">Percentual:</label>
               <input
@@ -94,20 +117,23 @@ export default async function AdiantamentoPage({
             <button type="submit" className="px-3 py-2 border border-gray-200 bg-white rounded-lg text-sm text-gray-600 hover:bg-gray-50">
               Calcular
             </button>
-          </div>
-          <div className="flex items-center gap-2">
-            <button type="button" className="flex items-center gap-2 px-3 py-2 border border-gray-200 bg-white rounded-lg text-sm text-gray-600 hover:bg-gray-50">
-              <Download className="w-4 h-4" />
-              Exportar
-            </button>
-            {adiantamentos.length > 0 && (
-              <button type="button" className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition-colors">
+          </form>
+
+          {adiantamentos.length > 0 && (
+            <form action={processarAdiantamento}>
+              <input type="hidden" name="empresaId" value={empresaId ?? ""} />
+              <input type="hidden" name="percentual" value={String(pct)} />
+              <input type="hidden" name="competencia" value={competencia} />
+              <button
+                type="submit"
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition-colors w-full sm:w-auto justify-center"
+              >
                 <Play className="w-4 h-4" />
                 Processar Adiantamento
               </button>
-            )}
-          </div>
-        </form>
+            </form>
+          )}
+        </div>
 
         {adiantamentos.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">

@@ -2,7 +2,8 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 import Header from "@/components/layout/Header";
-import { Calculator, Info, Users, DollarSign, Download, Play } from "lucide-react";
+import { Calculator, Info, Users, DollarSign, Play, CheckCircle, AlertCircle } from "lucide-react";
+import { processarDecimoTerceiro } from "./actions";
 
 function fmt(v: number) {
   return v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -24,12 +25,12 @@ function calcularAvos(dataAdmissao: Date, anoReferencia: number): number {
 export default async function DecimoTerceiroPage({
   searchParams,
 }: {
-  searchParams: Promise<{ empresaId?: string; parcela?: string }>;
+  searchParams: Promise<{ empresaId?: string; parcela?: string; processado?: string; error?: string }>;
 }) {
   const session = await auth();
   if (!session?.user) redirect("/login");
   const escritorioId = (session.user as any).escritorioId as string;
-  const { empresaId, parcela = "1" } = await searchParams;
+  const { empresaId, parcela = "1", processado, error } = await searchParams;
 
   const anoAtual = new Date().getFullYear();
 
@@ -95,7 +96,23 @@ export default async function DecimoTerceiroPage({
         title="13º Salário"
         subtitle={`Cálculo ${anoAtual} — ${empresaSelecionada ? (empresaSelecionada.nomeFantasia ?? empresaSelecionada.razaoSocial) : "Selecione uma empresa"}`}
       />
-      <div className="flex-1 p-6 space-y-6">
+      <div className="flex-1 p-3 sm:p-6 space-y-6">
+
+        {processado === "1" && (
+          <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex gap-3">
+            <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-green-800">
+              {parcela === "1" ? "1ª Parcela" : "2ª Parcela"} do 13º salário processada com sucesso!
+            </p>
+          </div>
+        )}
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex gap-3">
+            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-red-700">{decodeURIComponent(error)}</p>
+          </div>
+        )}
 
         {/* Info banner */}
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-3">
@@ -113,8 +130,8 @@ export default async function DecimoTerceiroPage({
         </div>
 
         {/* Filters */}
-        <form method="GET" className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <form method="GET" className="flex flex-wrap items-center gap-3">
             <select
               name="empresaId"
               defaultValue={empresaId ?? ""}
@@ -141,26 +158,22 @@ export default async function DecimoTerceiroPage({
             >
               Calcular
             </button>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              className="flex items-center gap-2 px-3 py-2 border border-gray-200 bg-white rounded-lg text-sm text-gray-600 hover:bg-gray-50"
-            >
-              <Download className="w-4 h-4" />
-              Exportar
-            </button>
-            {parcelas.length > 0 && (
+          </form>
+
+          {parcelas.length > 0 && (
+            <form action={processarDecimoTerceiro}>
+              <input type="hidden" name="empresaId" value={empresaId ?? ""} />
+              <input type="hidden" name="parcela" value={parcela} />
               <button
-                type="button"
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition-colors"
+                type="submit"
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition-colors w-full sm:w-auto justify-center"
               >
                 <Play className="w-4 h-4" />
                 Processar {parcela === "1" ? "1ª" : "2ª"} Parcela
               </button>
-            )}
-          </div>
-        </form>
+            </form>
+          )}
+        </div>
 
         {/* Summary cards */}
         {parcelas.length > 0 && (

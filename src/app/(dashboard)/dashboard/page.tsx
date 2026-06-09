@@ -78,7 +78,7 @@ export default async function DashboardPage() {
   return (
     <>
       <Header title="Dashboard" subtitle="Visão geral do Departamento Pessoal" />
-      <div className="flex-1 p-6 space-y-6">
+      <div className="flex-1 p-3 sm:p-6 space-y-6">
 
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {stats.map((stat) => {

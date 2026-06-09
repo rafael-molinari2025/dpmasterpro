@@ -9,9 +9,10 @@ import {
   Shield, Upload, Settings, ChevronDown, ChevronRight, LogOut,
   Banknote, BookMarked, Activity,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import type { ModuloKey } from "@/lib/permissoes";
+import { useSidebar } from "./SidebarProvider";
 
 type NavChild = { label: string; href: string };
 type NavItem = {
@@ -98,6 +99,11 @@ export default function Sidebar() {
   const pathname = usePathname();
   const [expanded, setExpanded] = useState<string[]>([]);
   const { data: session } = useSession();
+  const { isOpen, close } = useSidebar();
+
+  useEffect(() => {
+    close();
+  }, [pathname]);
 
   const userName = session?.user?.name ?? "Usuário";
   const userEmail = session?.user?.email ?? "—";
@@ -133,7 +139,12 @@ export default function Sidebar() {
   const itensFiltrados = navItems.filter(podeVer);
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-[260px] bg-slate-900 flex flex-col z-30 print:hidden">
+    <aside className={cn(
+      "fixed left-0 top-0 h-full w-[260px] bg-slate-900 flex flex-col z-30 print:hidden",
+      "transition-transform duration-300 ease-in-out",
+      "lg:translate-x-0",
+      isOpen ? "translate-x-0" : "-translate-x-full"
+    )}>
       {/* Logo */}
       <div className="flex items-center gap-3 px-5 py-5 border-b border-slate-700">
         <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0">
