@@ -12,16 +12,34 @@ export async function POST(request: Request) {
   const { escritorioId } = guard.session;
 
   try {
-    const { empresaId } = await request.json();
+    const body = await request.json();
+    const { empresaId: empresaIdBody, eventoId } = body;
+
+    // Suporte a reenvio individual: aceita { eventoId } ou { empresaId }
+    let empresaId = empresaIdBody;
+    if (eventoId && !empresaId) {
+      const ev = await db.eventoEsocial.findFirst({
+        where: { id: eventoId, empresa: { escritorioId } },
+        select: { empresaId: true, status: true },
+      });
+      if (!ev) return NextResponse.json({ error: "Evento não encontrado" }, { status: 404 });
+      // Recolocar em PENDENTE para reenvio
+      await db.eventoEsocial.update({ where: { id: eventoId }, data: { status: "PENDENTE" } });
+      empresaId = ev.empresaId;
+    }
 
     const empresa = await db.empresa.findFirst({
       where: { id: empresaId, escritorioId },
     });
     if (!empresa) return NextResponse.json({ error: "Empresa não encontrada" }, { status: 404 });
 
-    // Buscar todos os eventos PENDENTE da empresa
+    // Buscar eventos PENDENTE (inclui o que acabou de ser resetado)
     const pendentes = await db.eventoEsocial.findMany({
-      where: { empresaId, status: "PENDENTE" },
+      where: {
+        empresaId,
+        status: "PENDENTE",
+        ...(eventoId ? { id: eventoId } : {}),
+      },
       orderBy: { createdAt: "asc" },
     });
 
@@ -101,16 +119,6 @@ export async function POST(request: Request) {
 
   } catch (error: any) {
     console.error("Erro ao enviar eventos eSocial:", error);
-
-    // Em caso de erro, voltar status para ERRO
-    try {
-      const { empresaId } = await request.clone().json();
-      await db.eventoEsocial.updateMany({
-        where: { empresaId, status: "ENVIANDO" },
-        data: { status: "ERRO" },
-      });
-    } catch { /* ignore */ }
-
     return NextResponse.json({ error: "Erro ao transmitir eventos eSocial" }, { status: 500 });
   }
 }

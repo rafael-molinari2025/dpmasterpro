@@ -3,7 +3,8 @@ import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 import Header from "@/components/layout/Header";
 import ESocialAcoes from "./ESocialAcoes";
-import { CheckCircle, XCircle, Clock, AlertTriangle, Eye, RotateCcw } from "lucide-react";
+import ESocialLinhaAcoes from "./ESocialLinhaAcoes";
+import { CheckCircle, XCircle, Clock, AlertTriangle } from "lucide-react";
 
 const statusConfig: Record<string, { label: string; icon: any; color: string; bg: string }> = {
   PENDENTE:  { label: "Pendente",   icon: Clock,         color: "text-amber-700", bg: "bg-amber-50"  },
@@ -170,31 +171,13 @@ export default async function ESocialPage({
                           {ev.createdAt.toLocaleString("pt-BR")}
                         </td>
                         <td className="px-5 py-4">
-                          <div className="flex items-center gap-1">
-                            {ev.xmlGerado && (
-                              <button
-                                title="Ver XML"
-                                onClick={() => {
-                                  const win = window.open("", "_blank");
-                                  if (win) {
-                                    win.document.write(`<pre style="font-family:monospace;font-size:12px;padding:16px;white-space:pre-wrap">${(ev.xmlGerado ?? "").replace(/</g, "&lt;")}</pre>`);
-                                    win.document.title = `${ev.tipoEvento} — ${ev.descricao}`;
-                                  }
-                                }}
-                                className="w-7 h-7 flex items-center justify-center rounded text-gray-400 hover:text-blue-600 hover:bg-blue-50"
-                              >
-                                <Eye className="w-3.5 h-3.5" />
-                              </button>
-                            )}
-                            {(ev.status === "ERRO" || ev.status === "REJEITADO") && (
-                              <button
-                                title="Reenviar"
-                                className="w-7 h-7 flex items-center justify-center rounded text-gray-400 hover:text-amber-600 hover:bg-amber-50"
-                              >
-                                <RotateCcw className="w-3.5 h-3.5" />
-                              </button>
-                            )}
-                          </div>
+                          <ESocialLinhaAcoes
+                            eventoId={ev.id}
+                            status={ev.status}
+                            xmlGerado={ev.xmlGerado}
+                            tipoEvento={ev.tipoEvento}
+                            descricao={ev.descricao}
+                          />
                         </td>
                       </tr>
                     );

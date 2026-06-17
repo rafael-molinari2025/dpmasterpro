@@ -158,7 +158,15 @@ export async function POST(request: Request) {
       descricao: `Empresa criada: ${empresa.razaoSocial} (CNPJ ${empresa.cnpj})`,
       detalhes: { empresaId: empresa.id, cnpj: empresa.cnpj, razaoSocial: empresa.razaoSocial, regimeTributario: empresa.regimeTributario },
     });
-    return NextResponse.json(empresa, { status: 201 });
+    // Nunca retornar pfxBase64 ou senha ao cliente
+    const { certificadoDigital: cert, ...empresaSemCert } = empresa;
+    const certRaw = cert as Record<string, unknown> | null;
+    return NextResponse.json({
+      ...empresaSemCert,
+      certificadoInfo: certRaw
+        ? { configurado: true, validade: certRaw.validade ?? null, titular: certRaw.titular ?? null }
+        : { configurado: false },
+    }, { status: 201 });
   } catch (error: any) {
     if (error?.code === "P2002") {
       return NextResponse.json({ error: "CNPJ já cadastrado neste escritório." }, { status: 409 });

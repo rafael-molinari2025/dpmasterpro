@@ -37,7 +37,13 @@ export async function POST(request: Request) {
 
     if (totalIRRF > 0) {
       guiasCriadas.push(await db.guiaPagamento.create({
-        data: { empresaId, folhaId, tipo: "DARF_IRRF", competencia, dataVencimento: vencimentoGPS, valorPrincipal: totalIRRF, valorTotal: totalIRRF, status: "PENDENTE" },
+        data: {
+          empresaId, folhaId, tipo: "DARF_IRRF", competencia,
+          dataVencimento: vencimentoGPS,
+          valorPrincipal: totalIRRF, valorTotal: totalIRRF,
+          codigoBarras: "1361", // Código de receita IRRF sobre trabalho assalariado (IN RFB 2.055/2021)
+          status: "PENDENTE",
+        },
       }));
     }
 
