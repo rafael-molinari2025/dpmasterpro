@@ -16,6 +16,7 @@ export default async function DashboardPage() {
   const hoje = new Date();
   const competenciaAtual = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}`;
   const em30dias = new Date(hoje.getTime() + 30 * 24 * 60 * 60 * 1000);
+  const em60dias = new Date(hoje.getTime() + 60 * 24 * 60 * 60 * 1000);
 
   const [
     totalAtivos,
@@ -23,6 +24,7 @@ export default async function DashboardPage() {
     feriasVencer,
     eventosPendentes,
     folhasDoMes,
+    guiasPendentes,
   ] = await Promise.all([
     db.funcionario.count({ where: { situacao: "ATIVO", empresa: { escritorioId } } }),
     db.empresa.count({ where: { escritorioId, ativa: true } }),
@@ -40,6 +42,16 @@ export default async function DashboardPage() {
       where: { empresa: { escritorioId }, competencia: competenciaAtual },
       select: { totalProventos: true, totalDescontos: true, totalLiquido: true, totalINSSPatronal: true },
     }),
+    db.guiaPagamento.findMany({
+      where: {
+        empresa: { escritorioId },
+        status: "PENDENTE",
+        dataVencimento: { gte: hoje, lte: em60dias },
+      },
+      select: { tipo: true, competencia: true, dataVencimento: true, status: true },
+      orderBy: { dataVencimento: "asc" },
+      take: 6,
+    }).catch(() => [] as Array<{ tipo: string; competencia: string; dataVencimento: Date; status: string }>),
   ]);
 
   const totalProventos = folhasDoMes.reduce((s, f) => s + parseFloat(f.totalProventos.toString()), 0);
@@ -50,16 +62,18 @@ export default async function DashboardPage() {
   const mesLabel = hoje.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
   const mesCap = mesLabel.charAt(0).toUpperCase() + mesLabel.slice(1);
 
-  const nextMes = hoje.getMonth() + 2 > 12 ? 1 : hoje.getMonth() + 2;
-  const nextAno = hoje.getMonth() + 2 > 12 ? hoje.getFullYear() + 1 : hoje.getFullYear();
-  const nextMesPad = String(nextMes).padStart(2, "0");
+  const TIPO_LABEL: Record<string, string> = {
+    GPS_INSS: "GPS — INSS",
+    DARF_IRRF: "DARF — IRRF",
+    FGTS_DIGITAL: "FGTS Digital",
+    DCTFWEB: "DCTFWeb",
+  };
 
-  const proximosVencimentos = [
-    { descricao: "GPS — INSS Empregado/Empregador", data: `20/${nextMesPad}/${nextAno}`, status: "pendente" },
-    { descricao: "DARF — IRRF", data: `20/${nextMesPad}/${nextAno}`, status: "pendente" },
-    { descricao: "FGTS Digital", data: `07/${nextMesPad}/${nextAno}`, status: "pendente" },
-    { descricao: "DCTFWeb", data: `15/${nextMesPad}/${nextAno}`, status: "pendente" },
-  ];
+  const proximosVencimentos = guiasPendentes.map((g) => ({
+    descricao: `${TIPO_LABEL[g.tipo] ?? g.tipo} — ${g.competencia}`,
+    data: new Date(g.dataVencimento).toLocaleDateString("pt-BR"),
+    status: "pendente" as const,
+  }));
 
   const stats = [
     { label: "Funcionários Ativos", value: String(totalAtivos), icon: Users, color: "blue", change: `${totalEmpresas} empresa${totalEmpresas !== 1 ? "s" : ""}` },
@@ -121,7 +135,14 @@ export default async function DashboardPage() {
               <Receipt className="w-4 h-4 text-gray-400" />
             </div>
             <div className="divide-y divide-gray-50">
-              {proximosVencimentos.map((item, i) => (
+              {proximosVencimentos.length === 0 ? (
+                <div className="px-5 py-8 text-center">
+                  <p className="text-sm text-gray-500">Nenhuma guia pendente nos próximos 60 dias</p>
+                  <a href="/guias" className="mt-1 inline-block text-xs text-blue-600 hover:underline">
+                    Ver guias →
+                  </a>
+                </div>
+              ) : proximosVencimentos.map((item, i) => (
                 <div key={i} className="flex items-center justify-between px-5 py-3.5">
                   <div>
                     <p className="text-sm text-gray-800">{item.descricao}</p>

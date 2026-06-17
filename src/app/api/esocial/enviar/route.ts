@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-guard";
+import { hasPermissao } from "@/lib/permissoes";
+import { isEncryptedCert, decryptCert } from "@/lib/encryption";
 import { transmitirEventos } from "@/lib/esocial-transmissao";
 import { registrarLog } from "@/lib/logger";
 
@@ -9,7 +11,11 @@ const AMBIENTE = (process.env.ESOCIAL_AMBIENTE ?? "2") as "1" | "2";
 export async function POST(request: Request) {
   const guard = await requireAuth();
   if (!guard.ok) return guard.response;
-  const { escritorioId } = guard.session;
+  const { escritorioId, perfil, permissoes } = guard.session;
+
+  if (!hasPermissao(perfil, permissoes as string[], "esocial")) {
+    return NextResponse.json({ error: "Sem permissão para acessar eSocial" }, { status: 403 });
+  }
 
   try {
     const body = await request.json();
@@ -53,10 +59,25 @@ export async function POST(request: Request) {
       data: { status: "ENVIANDO" },
     });
 
-    // Ler configuração de certificado (empresa ou variável de ambiente)
-    const certConfig = empresa.certificadoDigital as { pfxBase64?: string; senha?: string } | null;
-    const pfxBase64 = certConfig?.pfxBase64 ?? process.env.ESOCIAL_CERT_BASE64;
-    const senha = certConfig?.senha ?? process.env.ESOCIAL_CERT_SENHA;
+    // Ler e descriptografar certificado da empresa (ou fallback para env vars)
+    let pfxBase64 = process.env.ESOCIAL_CERT_BASE64;
+    let senha = process.env.ESOCIAL_CERT_SENHA;
+    const certRaw = empresa.certificadoDigital;
+    if (certRaw) {
+      if (isEncryptedCert(certRaw)) {
+        try {
+          const dec = decryptCert(certRaw);
+          pfxBase64 = dec.pfxBase64;
+          senha = dec.senha;
+        } catch {
+          // ENCRYPTION_KEY ausente — usa env vars como fallback
+        }
+      } else {
+        const legacy = certRaw as { pfxBase64?: string; senha?: string };
+        if (legacy.pfxBase64) pfxBase64 = legacy.pfxBase64;
+        if (legacy.senha) senha = legacy.senha;
+      }
+    }
 
     // Preparar lista de eventos com XML
     const eventosParaEnviar = pendentes

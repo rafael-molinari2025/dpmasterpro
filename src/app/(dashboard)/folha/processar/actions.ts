@@ -108,7 +108,7 @@ export async function processarFolha(formData: FormData) {
         descricao: "INSS — Empregado",
         tipo: "DESCONTO",
         valor: inss,
-        baseINSS: 0,
+        baseINSS: salario,
         baseFGTS: 0,
         baseIRRF: 0,
       });
@@ -122,7 +122,7 @@ export async function processarFolha(formData: FormData) {
           valor: irrf,
           baseINSS: 0,
           baseFGTS: 0,
-          baseIRRF: 0,
+          baseIRRF: baseIRRF,
         });
       }
     }
@@ -177,6 +177,7 @@ export async function processarFolha(formData: FormData) {
         dataVencimento: new Date(anoVenc, mesVenc - 1, 20),
         valorPrincipal: arredondar(totalIRRF),
         valorTotal: arredondar(totalIRRF),
+        codigoBarras: "1361",
         status: "PENDENTE" as const,
       });
     }
@@ -192,6 +193,17 @@ export async function processarFolha(formData: FormData) {
         status: "PENDENTE" as const,
       });
     }
+    // DCTFWeb — competência do mês seguinte, dia 15
+    guias.push({
+      empresaId,
+      folhaId: folha.id,
+      tipo: "DCTFWEB" as const,
+      competencia,
+      dataVencimento: new Date(anoVenc, mesVenc - 1, 15),
+      valorPrincipal: arredondar(totalINSSEmpregado + totalINSSPatronal + totalIRRF),
+      valorTotal: arredondar(totalINSSEmpregado + totalINSSPatronal + totalIRRF),
+      status: "PENDENTE" as const,
+    });
     if (guias.length > 0) {
       await db.guiaPagamento.createMany({ data: guias });
     }
