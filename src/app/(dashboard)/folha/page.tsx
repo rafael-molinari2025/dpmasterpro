@@ -87,10 +87,10 @@ export default async function FolhaPage({
               Filtrar
             </button>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <Link
               href={`/folha/processar${empresaId ? `?empresaId=${empresaId}` : ""}`}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition-colors whitespace-nowrap"
             >
               <Play className="w-4 h-4" />
               Processar Folha

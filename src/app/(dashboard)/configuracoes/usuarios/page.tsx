@@ -45,7 +45,7 @@ export default async function UsuariosPage() {
           </p>
           <Link
             href="/configuracoes/usuarios/novo"
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
+            className="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
           >
             <Plus className="w-4 h-4" />
             Novo Usuário

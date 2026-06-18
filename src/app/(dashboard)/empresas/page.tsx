@@ -51,27 +51,27 @@ export default async function EmpresasPage({
 
         {/* Barra de busca + Nova Empresa */}
         <form method="GET" className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-          <div className="flex gap-2">
-            <div className="relative flex-1 sm:flex-none">
+          <div className="flex gap-2 min-w-0 flex-1 sm:flex-none">
+            <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
                 name="q"
                 defaultValue={q ?? ""}
                 placeholder="Buscar empresa..."
-                className="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-64"
+                className="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
               />
             </div>
             <button
               type="submit"
-              className="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 whitespace-nowrap"
+              className="flex-shrink-0 px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 whitespace-nowrap"
             >
               Buscar
             </button>
           </div>
           <a
             href="/empresas/nova"
-            className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
+            className="flex-shrink-0 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
           >
             <Plus className="w-4 h-4" />
             Nova Empresa
@@ -142,7 +142,8 @@ export default async function EmpresasPage({
 
             {/* ── Tabela (tablet/desktop) ──────────────────────────── */}
             <div className="hidden sm:block bg-white rounded-xl border border-gray-200 overflow-hidden">
-              <table className="w-full">
+              <div className="overflow-x-auto">
+              <table className="w-full min-w-[580px]">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
                     <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Empresa</th>
@@ -203,6 +204,7 @@ export default async function EmpresasPage({
                   ))}
                 </tbody>
               </table>
+              </div>
               <div className="px-5 py-3 border-t border-gray-100">
                 <p className="text-xs text-gray-500">
                   {empresas.length} empresa{empresas.length !== 1 ? "s" : ""} encontrada{empresas.length !== 1 ? "s" : ""}

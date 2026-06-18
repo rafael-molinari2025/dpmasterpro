@@ -76,7 +76,7 @@ export default async function GuiasPage({
 
         {/* Filters */}
         <form method="GET" className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 min-w-0 flex-1">
             <select
               name="tipo"
               defaultValue={tipo ?? ""}
@@ -113,7 +113,7 @@ export default async function GuiasPage({
           </div>
           <Link
             href="/folha/processar"
-            className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
+            className="flex-shrink-0 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
           >
             Gerar via Folha
           </Link>
