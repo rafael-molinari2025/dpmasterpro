@@ -73,10 +73,13 @@ export default async function RubricasPage({
               Filtrar
             </button>
           </div>
-          <button className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors">
+          <a
+            href="/rubricas/nova"
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
+          >
             <Plus className="w-4 h-4" />
             Nova Rubrica
-          </button>
+          </a>
         </form>
 
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
