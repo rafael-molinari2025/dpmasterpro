@@ -63,9 +63,12 @@ export async function POST(request: Request) {
       }));
     }
 
-    guiasCriadas.push(await db.guiaPagamento.create({
-      data: { empresaId, folhaId, tipo: "DCTFWEB", competencia, dataVencimento: vencimentoDCTF, valorPrincipal: totalINSS + totalIRRF, valorTotal: totalINSS + totalIRRF, status: "PENDENTE" },
-    }));
+    const totalDCTF = totalINSS + totalIRRF;
+    if (totalDCTF > 0) {
+      guiasCriadas.push(await db.guiaPagamento.create({
+        data: { empresaId, folhaId, tipo: "DCTFWEB", competencia, dataVencimento: vencimentoDCTF, valorPrincipal: totalDCTF, valorTotal: totalDCTF, status: "PENDENTE" },
+      }));
+    }
 
     return NextResponse.json({
       guias: guiasCriadas,
