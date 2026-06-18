@@ -69,7 +69,7 @@ export default async function RescisaoPage({
       <div className="flex-1 p-3 sm:p-6 space-y-6">
 
         {/* Formulário de busca */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6">
           <h2 className="font-semibold text-gray-900 mb-4">Calcular Nova Rescisão</h2>
           {erro && (
             <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
