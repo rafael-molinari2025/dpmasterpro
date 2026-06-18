@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { redirect, notFound } from "next/navigation";
 import Header from "@/components/layout/Header";
 import FormEditarFuncionario from "./FormEditarFuncionario";
+import DependentesSection from "./DependentesSection";
 import Link from "next/link";
 import { ArrowLeft, User } from "lucide-react";
 
@@ -16,7 +17,7 @@ export default async function FuncionarioDetailPage({
   const escritorioId = (session.user as any).escritorioId as string;
   const { id } = await params;
 
-  const [funcionario, cargos, setores] = await Promise.all([
+  const [funcionario, cargos, setores, dependentes] = await Promise.all([
     db.funcionario.findFirst({
       where: { id, empresa: { escritorioId } },
       include: {
@@ -34,6 +35,10 @@ export default async function FuncionarioDetailPage({
       where: { empresa: { escritorioId }, ativo: true },
       select: { id: true, descricao: true, codigo: true, empresaId: true },
       orderBy: { descricao: "asc" },
+    }),
+    db.dependente.findMany({
+      where: { funcionario: { id, empresa: { escritorioId } } },
+      orderBy: { nome: "asc" },
     }),
   ]);
 
@@ -69,11 +74,18 @@ export default async function FuncionarioDetailPage({
           </span>
         </div>
 
-        <div className="max-w-4xl">
+        <div className="max-w-4xl space-y-6">
           <FormEditarFuncionario
             funcionario={funcData as any}
             cargos={cargos}
             setores={setores}
+          />
+          <DependentesSection
+            funcionarioId={id}
+            dependentesIniciais={dependentes.map((d) => ({
+              ...d,
+              dataNascimento: d.dataNascimento.toISOString(),
+            }))}
           />
         </div>
 

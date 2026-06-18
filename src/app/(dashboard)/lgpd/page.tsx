@@ -1,7 +1,35 @@
+import { auth } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { redirect } from "next/navigation";
 import Header from "@/components/layout/Header";
 import { Shield, Users, FileText, Download, Eye, AlertTriangle, CheckCircle } from "lucide-react";
 
-export default function LGPDPage() {
+export default async function LGPDPage() {
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+  const escritorioId = (session.user as any).escritorioId as string;
+
+  const empresaIds = await db.empresa.findMany({
+    where: { escritorioId },
+    select: { id: true },
+  }).then((es) => es.map((e) => e.id));
+
+  const funcionarioIds = await db.funcionario.findMany({
+    where: { empresaId: { in: empresaIds } },
+    select: { id: true },
+  }).then((fs) => fs.map((f) => f.id));
+
+  const [comConsentimento, pendentes] = await Promise.all([
+    db.consentimentoLGPD.count({
+      where: { funcionarioId: { in: funcionarioIds }, concedido: true },
+    }).catch(() => 0),
+    db.consentimentoLGPD.count({
+      where: { funcionarioId: { in: funcionarioIds }, concedido: false },
+    }).catch(() => 0),
+  ]);
+
+  const totalFuncionarios = funcionarioIds.length;
+
   return (
     <>
       <Header title="LGPD" subtitle="Gestão de dados pessoais conforme Lei nº 13.709/2018" />
@@ -10,9 +38,9 @@ export default function LGPDPage() {
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
-            { label: "Titular com Consentimento", value: "0", icon: CheckCircle, color: "text-green-600" },
-            { label: "Solicitações Pendentes", value: "0", icon: AlertTriangle, color: "text-amber-600" },
-            { label: "Dados Anonimizados", value: "0", icon: Shield, color: "text-blue-600" },
+            { label: "Consentimentos Concedidos", value: String(comConsentimento), icon: CheckCircle, color: "text-green-600" },
+            { label: "Pendentes de Consentimento", value: String(pendentes), icon: AlertTriangle, color: "text-amber-600" },
+            { label: "Total de Titulares", value: String(totalFuncionarios), icon: Users, color: "text-blue-600" },
             { label: "Relatórios Gerados", value: "0", icon: FileText, color: "text-gray-600" },
           ].map((s) => {
             const Icon = s.icon;
