@@ -16,6 +16,12 @@ export async function POST(request: Request) {
     const folha = await db.folha.findFirst({ where: { id: folhaId, empresaId } });
     if (!folha) return NextResponse.json({ error: "Folha não encontrada" }, { status: 404 });
 
+    // Check for existing guias for this folha
+    const existentes = await db.guiaPagamento.count({ where: { folhaId } });
+    if (existentes > 0) {
+      return NextResponse.json({ error: "Guias já foram geradas para esta folha" }, { status: 409 });
+    }
+
     const [ano, mes] = competencia.split("-").map(Number);
     const mesVencimento = mes === 12 ? 1 : mes + 1;
     const anoVencimento = mes === 12 ? ano + 1 : ano;

@@ -36,7 +36,10 @@ export default async function FolhaPage({
         competencia,
         ...(empresaId && { empresaId }),
       },
-      include: { empresa: { select: { razaoSocial: true, nomeFantasia: true } } },
+      include: {
+        empresa: { select: { razaoSocial: true, nomeFantasia: true } },
+        guias: { select: { id: true }, take: 1 },
+      },
       orderBy: { createdAt: "desc" },
     }),
     db.empresa.findMany({
@@ -184,6 +187,7 @@ export default async function FolhaPage({
                           status={f.status}
                           empresaId={f.empresaId}
                           competencia={f.competencia}
+                          temGuias={(f as any).guias?.length > 0}
                         />
                       </td>
                     </tr>
