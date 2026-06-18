@@ -5,7 +5,7 @@ import Header from "@/components/layout/Header";
 import FormEditarFuncionario from "./FormEditarFuncionario";
 import DependentesSection from "./DependentesSection";
 import Link from "next/link";
-import { ArrowLeft, User } from "lucide-react";
+import { ArrowLeft, User, TrendingUp } from "lucide-react";
 
 export default async function FuncionarioDetailPage({
   params,
@@ -17,7 +17,7 @@ export default async function FuncionarioDetailPage({
   const escritorioId = (session.user as any).escritorioId as string;
   const { id } = await params;
 
-  const [funcionario, cargos, setores, dependentes] = await Promise.all([
+  const [funcionario, cargos, setores, dependentes, historicoSalario] = await Promise.all([
     db.funcionario.findFirst({
       where: { id, empresa: { escritorioId } },
       include: {
@@ -40,6 +40,11 @@ export default async function FuncionarioDetailPage({
       where: { funcionario: { id, empresa: { escritorioId } } },
       orderBy: { nome: "asc" },
     }),
+    db.historicoSalario.findMany({
+      where: { funcionarioId: id },
+      orderBy: { dataAlteracao: "desc" },
+      take: 10,
+    }).catch(() => [] as any[]),
   ]);
 
   if (!funcionario) notFound();
@@ -87,6 +92,34 @@ export default async function FuncionarioDetailPage({
               dataNascimento: d.dataNascimento.toISOString(),
             }))}
           />
+
+          {historicoSalario.length > 0 && (
+            <div className="bg-white rounded-xl border border-gray-200 p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <TrendingUp className="w-4 h-4 text-gray-500" />
+                <h2 className="text-sm font-semibold text-gray-800">Histórico Salarial</h2>
+              </div>
+              <div className="divide-y divide-gray-100">
+                {historicoSalario.map((h: any) => (
+                  <div key={h.id} className="flex items-center justify-between py-3">
+                    <div>
+                      <p className="text-sm text-gray-700">
+                        R$ {parseFloat(h.salarioAnterior.toString()).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                        <span className="mx-2 text-gray-400">→</span>
+                        <span className="font-medium text-gray-900">
+                          R$ {parseFloat(h.salarioNovo.toString()).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                        </span>
+                      </p>
+                      {h.motivo && <p className="text-xs text-gray-400 mt-0.5">{h.motivo}</p>}
+                    </div>
+                    <span className="text-xs text-gray-400">
+                      {new Date(h.dataAlteracao).toLocaleDateString("pt-BR")}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
       </div>

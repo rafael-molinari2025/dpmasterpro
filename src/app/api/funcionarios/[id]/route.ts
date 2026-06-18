@@ -89,5 +89,23 @@ export async function PATCH(
   if (endereco !== undefined) data.endereco = endereco;
 
   const updated = await db.funcionario.update({ where: { id }, data });
+
+  // Record salary change if salary was updated
+  if (salario !== undefined) {
+    const novoSalario = parseFloat(salario);
+    const salarioAnterior = parseFloat(existing.salario.toString());
+    if (Math.abs(novoSalario - salarioAnterior) > 0.001) {
+      await db.historicoSalario.create({
+        data: {
+          funcionarioId: id,
+          salarioAnterior,
+          salarioNovo: novoSalario,
+          dataAlteracao: new Date(),
+          motivo: "Alteração via sistema",
+        },
+      }).catch(() => {});
+    }
+  }
+
   return NextResponse.json(updated);
 }
