@@ -2,7 +2,8 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 import Header from "@/components/layout/Header";
-import { Plus, Briefcase, Users } from "lucide-react";
+import { Briefcase, Users } from "lucide-react";
+import CargosAcoes from "./CargosAcoes";
 
 export default async function CargosPage({
   searchParams,
@@ -51,13 +52,7 @@ export default async function CargosPage({
               <option key={e.id} value={e.id}>{e.nomeFantasia ?? e.razaoSocial}</option>
             ))}
           </select>
-          <button
-            type="button"
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            Novo Cargo
-          </button>
+          <CargosAcoes empresas={empresas} />
         </form>
 
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
