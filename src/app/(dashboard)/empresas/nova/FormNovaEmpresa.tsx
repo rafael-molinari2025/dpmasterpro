@@ -101,7 +101,7 @@ export default function FormNovaEmpresa() {
   }
 
   return (
-    <div className="flex-1 p-6">
+    <div className="flex-1 p-3 sm:p-6">
       <div className="max-w-3xl mx-auto">
         <div className="mb-4">
           <a href="/empresas" className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700">
@@ -122,8 +122,8 @@ export default function FormNovaEmpresa() {
           {/* Dados Principais */}
           <div className="bg-white rounded-xl border border-gray-200 p-5">
             <h2 className="text-sm font-semibold text-gray-800 mb-4">Dados da Empresa</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="col-span-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="col-span-full sm:col-span-2">
                 <label className={label}>Razão Social *</label>
                 <input type="text" name="razaoSocial" required className={input} placeholder="Razão Social da empresa" />
               </div>
@@ -177,7 +177,7 @@ export default function FormNovaEmpresa() {
           {/* Responsável */}
           <div className="bg-white rounded-xl border border-gray-200 p-5">
             <h2 className="text-sm font-semibold text-gray-800 mb-4">Responsável e Contato</h2>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className={label}>Nome do Responsável</label>
                 <input type="text" name="responsavelNome" className={input} placeholder="Nome completo" />
@@ -200,12 +200,12 @@ export default function FormNovaEmpresa() {
           {/* Endereço */}
           <div className="bg-white rounded-xl border border-gray-200 p-5">
             <h2 className="text-sm font-semibold text-gray-800 mb-4">Endereço</h2>
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div>
                 <label className={label}>CEP</label>
                 <input type="text" name="endCEP" className={input} placeholder="00000-000" maxLength={9} />
               </div>
-              <div className="col-span-2">
+              <div className="col-span-2 sm:col-span-2">
                 <label className={label}>Logradouro</label>
                 <input type="text" name="endLogradouro" className={input} placeholder="Rua, Av., etc." />
               </div>
@@ -213,7 +213,7 @@ export default function FormNovaEmpresa() {
                 <label className={label}>Número</label>
                 <input type="text" name="endNumero" className={input} placeholder="Nº" />
               </div>
-              <div className="col-span-2">
+              <div className="col-span-2 sm:col-span-2">
                 <label className={label}>Complemento</label>
                 <input type="text" name="endComplemento" className={input} placeholder="Sala, Andar, etc." />
               </div>
@@ -315,7 +315,7 @@ export default function FormNovaEmpresa() {
           </div>
 
           {/* Botões */}
-          <div className="flex items-center justify-end gap-3 pb-6">
+          <div className="flex flex-wrap items-center justify-end gap-3 pb-6">
             <a
               href="/empresas"
               className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors"
