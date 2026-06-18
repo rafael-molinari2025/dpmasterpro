@@ -60,7 +60,7 @@ export default async function SetoresPage({
             <div className="text-center py-16">
               <Layers className="w-12 h-12 text-gray-200 mx-auto mb-3" />
               <p className="text-gray-500 font-medium">Nenhum setor cadastrado</p>
-              <p className="text-sm text-gray-400 mt-1">Os setores são criados ao cadastrar funcionários.</p>
+              <p className="text-sm text-gray-400 mt-1">Clique em "Novo Setor" para cadastrar o primeiro setor.</p>
             </div>
           ) : (
             <>
