@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import Header from "@/components/layout/Header";
 import Link from "next/link";
 import { CheckCircle, Clock, AlertTriangle } from "lucide-react";
+import GuiaLinhaAcoes from "./GuiaLinhaAcoes";
 
 const tipoGuiaInfo: Record<string, { label: string; cor: string; vencimento: string }> = {
   GPS_INSS:     { label: "GPS — INSS",    cor: "bg-blue-50 text-blue-700 border-blue-200",     vencimento: "Dia 20 do mês seguinte" },
@@ -145,6 +146,7 @@ export default async function GuiasPage({
                       <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Vencimento</th>
                       <th className="text-right px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Valor</th>
                       <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Status</th>
+                      <th className="px-5 py-3"></th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
@@ -184,6 +186,9 @@ export default async function GuiasPage({
                                 <Clock className="w-3 h-3" /> Pendente
                               </span>
                             )}
+                          </td>
+                          <td className="px-5 py-4">
+                            <GuiaLinhaAcoes guiaId={g.id} status={g.status} />
                           </td>
                         </tr>
                       );

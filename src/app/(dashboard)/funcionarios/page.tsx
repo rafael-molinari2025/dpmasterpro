@@ -2,7 +2,8 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 import Header from "@/components/layout/Header";
-import { Plus, Search, MoreVertical, Users } from "lucide-react";
+import { Plus, Search, Settings, Users } from "lucide-react";
+import Link from "next/link";
 
 const situacaoStyle: Record<string, string> = {
   ATIVO: "bg-green-50 text-green-700",
@@ -182,9 +183,13 @@ export default async function FuncionariosPage({
                         </span>
                       </td>
                       <td className="px-5 py-4">
-                        <button className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors">
-                          <MoreVertical className="w-4 h-4" />
-                        </button>
+                        <Link
+                          href={`/funcionarios/${f.id}`}
+                          className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-blue-600 px-2 py-1.5 rounded-lg border border-gray-200 hover:border-blue-200 hover:bg-blue-50 transition-colors"
+                        >
+                          <Settings className="w-3.5 h-3.5" />
+                          Editar
+                        </Link>
                       </td>
                     </tr>
                   ))}
