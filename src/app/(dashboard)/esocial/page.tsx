@@ -116,16 +116,58 @@ export default async function ESocialPage({
         </div>
 
         {/* Tabela de eventos */}
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          {eventos.length === 0 ? (
-            <div className="text-center py-16">
-              <p className="text-gray-500 font-medium">Nenhum evento eSocial encontrado</p>
-              <p className="text-sm text-gray-400 mt-1">
-                Os eventos são gerados ao processar folhas, admissões e configurações.
+        {eventos.length === 0 ? (
+          <div className="bg-white rounded-xl border border-gray-200 text-center py-16">
+            <p className="text-gray-500 font-medium">Nenhum evento eSocial encontrado</p>
+            <p className="text-sm text-gray-400 mt-1">
+              Os eventos são gerados ao processar folhas, admissões e configurações.
+            </p>
+          </div>
+        ) : (
+          <>
+            {/* Cards (mobile) */}
+            <div className="sm:hidden space-y-3">
+              {eventos.map((ev) => {
+                const s = statusConfig[ev.status] ?? statusConfig["PENDENTE"];
+                const StatusIcon = s.icon;
+                return (
+                  <div key={ev.id} className="bg-white rounded-xl border border-gray-200 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="flex-shrink-0 text-xs font-mono font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded">
+                          {ev.tipoEvento}
+                        </span>
+                        <span className={`flex-shrink-0 flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${s.bg} ${s.color}`}>
+                          <StatusIcon className="w-3 h-3" />
+                          {s.label}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="mt-2 space-y-1 text-xs text-gray-600">
+                      <p className="font-medium text-gray-800 truncate">{ev.descricao}</p>
+                      <p><span className="text-gray-400">Empresa:</span> {ev.empresa.nomeFantasia ?? ev.empresa.razaoSocial}</p>
+                      {ev.protocolo && <p><span className="text-gray-400">Protocolo:</span> <span className="font-mono">{ev.protocolo}</span></p>}
+                      <p><span className="text-gray-400">Gerado em:</span> {ev.createdAt.toLocaleString("pt-BR")}</p>
+                    </div>
+                    <div className="mt-3">
+                      <ESocialLinhaAcoes
+                        eventoId={ev.id}
+                        status={ev.status}
+                        xmlGerado={ev.xmlGerado}
+                        tipoEvento={ev.tipoEvento}
+                        descricao={ev.descricao}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+              <p className="text-xs text-gray-400 text-center pt-1">
+                {eventos.length} evento{eventos.length !== 1 ? "s" : ""} • {ambiente}{modoDemo && " • Demo"}
               </p>
             </div>
-          ) : (
-            <>
+
+            {/* Tabela (tablet/desktop) */}
+            <div className="hidden sm:block bg-white rounded-xl border border-gray-200 overflow-hidden">
               <div className="overflow-x-auto">
               <table className="w-full min-w-[750px]">
                 <thead className="bg-gray-50 border-b border-gray-200">
@@ -192,9 +234,9 @@ export default async function ESocialPage({
                 </p>
                 <p className="text-xs text-gray-400">Leiaute S-1.3</p>
               </div>
-            </>
-          )}
-        </div>
+            </div>
+          </>
+        )}
 
         {/* Ordem de envio */}
         <div className="bg-slate-50 rounded-xl border border-slate-200 p-5">

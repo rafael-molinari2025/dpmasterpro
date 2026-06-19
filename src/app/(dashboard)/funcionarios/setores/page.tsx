@@ -64,15 +64,36 @@ export default async function SetoresPage({
           <SetoresAcoes empresas={empresas} />
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          {setores.length === 0 ? (
-            <div className="text-center py-16">
-              <Layers className="w-12 h-12 text-gray-200 mx-auto mb-3" />
-              <p className="text-gray-500 font-medium">Nenhum setor cadastrado</p>
-              <p className="text-sm text-gray-400 mt-1">Clique em "Novo Setor" para cadastrar o primeiro setor.</p>
+        {setores.length === 0 ? (
+          <div className="bg-white rounded-xl border border-gray-200 text-center py-16">
+            <Layers className="w-12 h-12 text-gray-200 mx-auto mb-3" />
+            <p className="text-gray-500 font-medium">Nenhum setor cadastrado</p>
+            <p className="text-sm text-gray-400 mt-1">Clique em "Novo Setor" para cadastrar o primeiro setor.</p>
+          </div>
+        ) : (
+          <>
+            {/* Cards (mobile) */}
+            <div className="sm:hidden space-y-3">
+              {setores.map((s) => (
+                <div key={s.id} className="bg-white rounded-xl border border-gray-200 p-4 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-teal-100 flex items-center justify-center flex-shrink-0">
+                    <Layers className="w-5 h-5 text-teal-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 truncate">{s.descricao}</p>
+                    <p className="text-xs text-gray-500 truncate">{s.empresa.nomeFantasia ?? s.empresa.razaoSocial}</p>
+                  </div>
+                  <span className="flex-shrink-0 flex items-center gap-1 text-sm text-gray-600">
+                    <Users className="w-3 h-3" />
+                    {s._count.funcionarios}
+                  </span>
+                </div>
+              ))}
+              <p className="text-xs text-gray-400 text-center pt-1">{setores.length} setor{setores.length !== 1 ? "es" : ""} cadastrado{setores.length !== 1 ? "s" : ""}</p>
             </div>
-          ) : (
-            <>
+
+            {/* Tabela (tablet/desktop) */}
+            <div className="hidden sm:block bg-white rounded-xl border border-gray-200 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[420px]">
                   <thead className="bg-gray-50 border-b border-gray-200">
@@ -110,9 +131,9 @@ export default async function SetoresPage({
               <div className="px-5 py-3 border-t border-gray-100">
                 <p className="text-xs text-gray-500">{setores.length} setor{setores.length !== 1 ? "es" : ""} cadastrado{setores.length !== 1 ? "s" : ""}</p>
               </div>
-            </>
-          )}
-        </div>
+            </div>
+          </>
+        )}
 
       </div>
     </>

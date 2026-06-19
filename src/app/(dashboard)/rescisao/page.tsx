@@ -5,7 +5,6 @@ import Header from "@/components/layout/Header";
 import { Calculator, Search } from "lucide-react";
 import { calcularRescisao } from "@/lib/calculo-folha";
 import PrintButton from "@/components/PrintButton";
-import RescisaoAcoes from "./RescisaoAcoes";
 
 const tipoRescisaoLabel: Record<string, string> = {
   PEDIDO_DEMISSAO:          "Pedido de Demissão",
@@ -69,7 +68,7 @@ export default async function RescisaoPage({
       <div className="flex-1 p-3 sm:p-6 space-y-6">
 
         {/* Formulário de busca */}
-        <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6">
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h2 className="font-semibold text-gray-900 mb-4">Calcular Nova Rescisão</h2>
           {erro && (
             <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
@@ -180,22 +179,7 @@ export default async function RescisaoPage({
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
             <h2 className="font-semibold text-gray-900">TRCT — Demonstrativo de Rescisão</h2>
-            {resultado && funcionario && funcionario.situacao !== "DEMITIDO" && (
-              <div className="flex items-center gap-3">
-                <RescisaoAcoes
-                  funcionarioId={funcionario.id}
-                  tipoRescisao={tipoParam!}
-                  dataDemissao={dataParam!}
-                />
-                <PrintButton />
-              </div>
-            )}
-            {resultado && funcionario?.situacao === "DEMITIDO" && (
-              <div className="flex items-center gap-3">
-                <span className="text-xs text-green-700 font-medium">Rescisão já registrada</span>
-                <PrintButton />
-              </div>
-            )}
+            {resultado && <PrintButton />}
           </div>
           <div className="p-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">

@@ -64,15 +64,37 @@ export default async function CargosPage({
           <CargosAcoes empresas={empresas} />
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          {cargos.length === 0 ? (
-            <div className="text-center py-16">
-              <Briefcase className="w-12 h-12 text-gray-200 mx-auto mb-3" />
-              <p className="text-gray-500 font-medium">Nenhum cargo cadastrado</p>
-              <p className="text-sm text-gray-400 mt-1">Clique em "Novo Cargo" para cadastrar o primeiro cargo.</p>
+        {cargos.length === 0 ? (
+          <div className="bg-white rounded-xl border border-gray-200 text-center py-16">
+            <Briefcase className="w-12 h-12 text-gray-200 mx-auto mb-3" />
+            <p className="text-gray-500 font-medium">Nenhum cargo cadastrado</p>
+            <p className="text-sm text-gray-400 mt-1">Clique em "Novo Cargo" para cadastrar o primeiro cargo.</p>
+          </div>
+        ) : (
+          <>
+            {/* Cards (mobile) */}
+            <div className="sm:hidden space-y-3">
+              {cargos.map((c) => (
+                <div key={c.id} className="bg-white rounded-xl border border-gray-200 p-4 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink-0">
+                    <Briefcase className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 truncate">{c.descricao}</p>
+                    <p className="text-xs text-gray-500 truncate">{c.empresa.nomeFantasia ?? c.empresa.razaoSocial}</p>
+                    {c.cbo && <p className="text-xs font-mono text-gray-400">CBO: {c.cbo}</p>}
+                  </div>
+                  <span className="flex-shrink-0 flex items-center gap-1 text-sm text-gray-600">
+                    <Users className="w-3 h-3" />
+                    {c._count.funcionarios}
+                  </span>
+                </div>
+              ))}
+              <p className="text-xs text-gray-400 text-center pt-1">{cargos.length} cargo{cargos.length !== 1 ? "s" : ""} cadastrado{cargos.length !== 1 ? "s" : ""}</p>
             </div>
-          ) : (
-            <>
+
+            {/* Tabela (tablet/desktop) */}
+            <div className="hidden sm:block bg-white rounded-xl border border-gray-200 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[480px]">
                   <thead className="bg-gray-50 border-b border-gray-200">
@@ -112,9 +134,9 @@ export default async function CargosPage({
               <div className="px-5 py-3 border-t border-gray-100">
                 <p className="text-xs text-gray-500">{cargos.length} cargo{cargos.length !== 1 ? "s" : ""} cadastrado{cargos.length !== 1 ? "s" : ""}</p>
               </div>
-            </>
-          )}
-        </div>
+            </div>
+          </>
+        )}
 
       </div>
     </>

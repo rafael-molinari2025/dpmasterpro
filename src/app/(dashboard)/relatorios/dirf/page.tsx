@@ -174,7 +174,22 @@ export default async function DIRFPage({
               </h2>
               <span className="text-xs text-gray-500">{porEmpresa.size} empresa{porEmpresa.size !== 1 ? "s" : ""}</span>
             </div>
-            <div className="overflow-x-auto">
+            {/* Cards (mobile) */}
+            <div className="sm:hidden divide-y divide-gray-100">
+              {[...porEmpresa.values()].map((e) => (
+                <div key={e.cnpj} className="p-4 space-y-1">
+                  <p className="text-sm font-semibold text-gray-900">{e.nome}</p>
+                  <p className="text-xs font-mono text-gray-400">{e.cnpj}</p>
+                  <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 mt-2">
+                    <p><span className="text-gray-400">Competências:</span> {e.competencias}</p>
+                    <p><span className="text-gray-400">Proventos:</span> R$ {fmt(e.proventos)}</p>
+                  </div>
+                  <p className="text-sm font-bold text-blue-700 mt-1">IRRF: R$ {fmt(e.irrf)}</p>
+                </div>
+              ))}
+            </div>
+            {/* Tabela (tablet/desktop) */}
+            <div className="hidden sm:block overflow-x-auto">
               <table className="w-full min-w-[600px]">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
@@ -220,7 +235,21 @@ export default async function DIRFPage({
               <h2 className="font-semibold text-gray-900">Beneficiários com IRRF Retido</h2>
               <Download className="w-4 h-4 text-gray-400" />
             </div>
-            <div className="overflow-x-auto">
+            {/* Cards (mobile) */}
+            <div className="sm:hidden divide-y divide-gray-100">
+              {funcionariosComIRRF.map((f, i) => (
+                <div key={i} className="p-4 flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 truncate">{f.nome}</p>
+                    <p className="text-xs font-mono text-gray-400">{f.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4")}</p>
+                    <p className="text-xs text-gray-500 truncate">{f.empresa}</p>
+                  </div>
+                  <p className="flex-shrink-0 text-sm font-bold text-blue-700">R$ {fmt(f.irrf)}</p>
+                </div>
+              ))}
+            </div>
+            {/* Tabela (tablet/desktop) */}
+            <div className="hidden sm:block overflow-x-auto">
               <table className="w-full min-w-[500px]">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>

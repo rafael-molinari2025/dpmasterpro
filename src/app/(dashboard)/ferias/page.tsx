@@ -146,17 +146,52 @@ export default async function FeriasPage({
           </Link>
         </form>
 
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          {ferias.length === 0 ? (
-            <div className="text-center py-16">
-              <Calendar className="w-12 h-12 text-gray-200 mx-auto mb-3" />
-              <p className="text-gray-500 font-medium">Nenhum registro de férias encontrado</p>
-              <p className="text-sm text-gray-400 mt-1">
-                {q || status ? "Ajuste os filtros de busca." : "Clique em \"Programar Férias\" para iniciar."}
+        {ferias.length === 0 ? (
+          <div className="bg-white rounded-xl border border-gray-200 text-center py-16">
+            <Calendar className="w-12 h-12 text-gray-200 mx-auto mb-3" />
+            <p className="text-gray-500 font-medium">Nenhum registro de férias encontrado</p>
+            <p className="text-sm text-gray-400 mt-1">
+              {q || status ? "Ajuste os filtros de busca." : "Clique em \"Programar Férias\" para iniciar."}
+            </p>
+          </div>
+        ) : (
+          <>
+            {/* Cards (mobile) */}
+            <div className="sm:hidden space-y-3">
+              {ferias.map((f) => {
+                const s = statusConfig[f.status] ?? statusConfig["A_VENCER"];
+                const StatusIcon = s.icon;
+                return (
+                  <div key={f.id} className="bg-white rounded-xl border border-gray-200 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 truncate">{f.funcionario.nome}</p>
+                        <p className="text-xs text-gray-500">{f.funcionario.cargo?.descricao ?? "—"}</p>
+                      </div>
+                      <span className={`flex-shrink-0 flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full ${s.color}`}>
+                        <StatusIcon className="w-3 h-3" />
+                        {s.label}
+                      </span>
+                    </div>
+                    <div className="mt-3 space-y-1.5 text-xs text-gray-600">
+                      <p><span className="text-gray-400">Período:</span> {fmtDate(f.dataInicioAquisitivo)} – {fmtDate(f.dataFimAquisitivo)}</p>
+                      <p><span className="text-gray-400">Vencimento:</span> {fmtDate(f.dataFimAquisitivo)}</p>
+                      <p><span className="text-gray-400">Dias:</span> {f.diasGozo !== null ? `${f.diasGozo}/${f.diasDireito}d` : `${f.diasDireito}d`}</p>
+                    </div>
+                    <div className="mt-3 flex items-center gap-3">
+                      <Link href={`/ferias/${f.id}`} className="text-xs text-blue-600 hover:underline">Calcular</Link>
+                      <Link href={`/ferias/${f.id}`} className="text-xs text-gray-500 hover:underline">Editar</Link>
+                    </div>
+                  </div>
+                );
+              })}
+              <p className="text-xs text-gray-400 text-center pt-1">
+                {ferias.length} registro{ferias.length !== 1 ? "s" : ""} encontrado{ferias.length !== 1 ? "s" : ""}
               </p>
             </div>
-          ) : (
-            <>
+
+            {/* Tabela (tablet/desktop) */}
+            <div className="hidden sm:block bg-white rounded-xl border border-gray-200 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[700px]">
                   <thead className="bg-gray-50 border-b border-gray-200">
@@ -198,18 +233,8 @@ export default async function FeriasPage({
                           </td>
                           <td className="px-5 py-4">
                             <div className="flex items-center gap-2">
-                              <Link
-                                href={`/ferias/${f.id}`}
-                                className="text-xs text-blue-600 hover:underline"
-                              >
-                                Calcular
-                              </Link>
-                              <Link
-                                href={`/ferias/${f.id}`}
-                                className="text-xs text-gray-500 hover:underline"
-                              >
-                                Editar
-                              </Link>
+                              <Link href={`/ferias/${f.id}`} className="text-xs text-blue-600 hover:underline">Calcular</Link>
+                              <Link href={`/ferias/${f.id}`} className="text-xs text-gray-500 hover:underline">Editar</Link>
                             </div>
                           </td>
                         </tr>
@@ -221,9 +246,9 @@ export default async function FeriasPage({
               <div className="px-5 py-3 border-t border-gray-100">
                 <p className="text-xs text-gray-500">{ferias.length} registro{ferias.length !== 1 ? "s" : ""} encontrado{ferias.length !== 1 ? "s" : ""}</p>
               </div>
-            </>
-          )}
-        </div>
+            </div>
+          </>
+        )}
 
         <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
           <h3 className="text-sm font-semibold text-slate-800 mb-2">Regras CLT — Férias (Arts. 129–145)</h3>

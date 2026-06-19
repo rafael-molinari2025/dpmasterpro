@@ -78,15 +78,39 @@ export default async function GuiasGPSPage({
           )}
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          {guias.length === 0 ? (
-            <div className="text-center py-16">
-              <Receipt className="w-12 h-12 text-gray-200 mx-auto mb-3" />
-              <p className="text-gray-500 font-medium">Nenhuma GPS gerada</p>
-              <p className="text-sm text-gray-400 mt-1">As guias são geradas ao processar a folha de pagamento.</p>
+        {guias.length === 0 ? (
+          <div className="bg-white rounded-xl border border-gray-200 text-center py-16">
+            <Receipt className="w-12 h-12 text-gray-200 mx-auto mb-3" />
+            <p className="text-gray-500 font-medium">Nenhuma GPS gerada</p>
+            <p className="text-sm text-gray-400 mt-1">As guias são geradas ao processar a folha de pagamento.</p>
+          </div>
+        ) : (
+          <>
+            {/* Cards (mobile) */}
+            <div className="sm:hidden space-y-3">
+              {guias.map((g) => (
+                <div key={g.id} className="bg-white rounded-xl border border-gray-200 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-gray-900 truncate">{g.empresa.nomeFantasia ?? g.empresa.razaoSocial}</p>
+                      <p className="text-xs font-mono text-gray-400 mt-0.5">{g.empresa.cnpj}</p>
+                    </div>
+                    <span className={`flex-shrink-0 text-xs px-2 py-1 rounded-full font-medium ${statusStyle[g.status] ?? "bg-gray-100 text-gray-600"}`}>
+                      {g.status}
+                    </span>
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-gray-600">
+                    <p><span className="text-gray-400">Competência:</span> {g.competencia}</p>
+                    <p><span className="text-gray-400">Vencimento:</span> {g.dataVencimento.toLocaleDateString("pt-BR")}</p>
+                  </div>
+                  <p className="mt-2 text-base font-bold text-gray-900">R$ {fmt(parseFloat(g.valorTotal.toString()))}</p>
+                </div>
+              ))}
+              <p className="text-xs text-gray-400 text-center pt-1">{guias.length} guia{guias.length !== 1 ? "s" : ""} GPS</p>
             </div>
-          ) : (
-            <>
+
+            {/* Tabela (tablet/desktop) */}
+            <div className="hidden sm:block bg-white rounded-xl border border-gray-200 overflow-hidden">
               <div className="overflow-x-auto">
               <table className="w-full min-w-[520px]">
                 <thead className="bg-gray-50 border-b border-gray-200">
@@ -126,9 +150,9 @@ export default async function GuiasGPSPage({
               <div className="px-5 py-3 border-t border-gray-100">
                 <p className="text-xs text-gray-500">{guias.length} guia{guias.length !== 1 ? "s" : ""} GPS</p>
               </div>
-            </>
-          )}
-        </div>
+            </div>
+          </>
+        )}
 
       </div>
     </>

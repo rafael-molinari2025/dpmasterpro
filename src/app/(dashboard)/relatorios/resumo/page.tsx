@@ -58,10 +58,10 @@ export default async function ResumoFolhaPage({
   return (
     <>
       <Header title="Resumo da Folha" subtitle={`Consolidado ${labelCap}`} />
-      <div className="flex-1 p-6 space-y-6">
+      <div className="flex-1 p-3 sm:p-6 space-y-6">
 
-        <form method="GET" className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <form method="GET" className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <input
               type="month"
               name="competencia"
@@ -108,7 +108,36 @@ export default async function ResumoFolhaPage({
               <div className="px-5 py-4 border-b border-gray-100">
                 <h2 className="font-semibold text-gray-900">Resumo por Empresa — {labelCap}</h2>
               </div>
-              <table className="w-full">
+              {/* Cards (mobile) */}
+              <div className="sm:hidden divide-y divide-gray-100">
+                {folhas.map((f) => (
+                  <div key={f.id} className="p-4 space-y-2">
+                    <p className="text-sm font-semibold text-gray-900">{f.empresa.nomeFantasia ?? f.empresa.razaoSocial}</p>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-600">
+                      <p><span className="text-gray-400">Proventos:</span> R$ {fmt(parseFloat(f.totalProventos.toString()))}</p>
+                      <p><span className="text-gray-400">Descontos:</span> <span className="text-red-700">R$ {fmt(parseFloat(f.totalDescontos.toString()))}</span></p>
+                      <p><span className="text-gray-400">INSS Patron.:</span> R$ {fmt(parseFloat(f.totalINSSPatronal.toString()))}</p>
+                      <p><span className="text-gray-400">FGTS:</span> R$ {fmt(parseFloat(f.totalFGTS.toString()))}</p>
+                      <p><span className="text-gray-400">IRRF:</span> R$ {fmt(parseFloat(f.totalIRRF.toString()))}</p>
+                    </div>
+                    <p className="text-sm font-bold text-green-700">Líquido: R$ {fmt(parseFloat(f.totalLiquido.toString()))}</p>
+                  </div>
+                ))}
+                <div className="p-4 bg-gray-50">
+                  <p className="text-xs font-bold text-gray-700">TOTAL GERAL</p>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-600 mt-1">
+                    <p>Proventos: R$ {fmt(totals.proventos)}</p>
+                    <p className="text-red-700">Descontos: R$ {fmt(totals.descontos)}</p>
+                    <p>INSS: R$ {fmt(totals.inssPatronal)}</p>
+                    <p>FGTS: R$ {fmt(totals.fgts)}</p>
+                    <p>IRRF: R$ {fmt(totals.irrf)}</p>
+                  </div>
+                  <p className="text-sm font-bold text-green-700 mt-1">Líquido: R$ {fmt(totals.liquido)}</p>
+                </div>
+              </div>
+              {/* Tabela (tablet/desktop) */}
+              <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full min-w-[700px]">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
                     <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Empresa</th>
@@ -147,6 +176,7 @@ export default async function ResumoFolhaPage({
                   </tr>
                 </tfoot>
               </table>
+              </div>
             </div>
           </>
         )}

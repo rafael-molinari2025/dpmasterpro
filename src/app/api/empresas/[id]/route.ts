@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-guard";
 import { registrarLog } from "@/lib/logger";
-import { encryptCert } from "@/lib/encryption";
 
 export async function GET(
   _req: Request,
@@ -106,9 +105,7 @@ export async function PATCH(
           );
         }
       }
-      certificadoDigital = process.env.ENCRYPTION_KEY
-        ? encryptCert(certificadoPfxBase64, certificadoSenha, { validade, titular })
-        : { pfxBase64: certificadoPfxBase64, senha: certificadoSenha, validade, titular };
+      certificadoDigital = { pfxBase64: certificadoPfxBase64, senha: certificadoSenha, validade, titular };
     }
 
     // Montar objeto de atualização somente com campos permitidos

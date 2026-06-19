@@ -82,14 +82,45 @@ export default async function RubricasPage({
           </a>
         </form>
 
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          {rubricas.length === 0 ? (
-            <div className="text-center py-16">
-              <BookOpen className="w-12 h-12 text-gray-200 mx-auto mb-3" />
-              <p className="text-gray-500 font-medium">Nenhuma rubrica encontrada</p>
+        {rubricas.length === 0 ? (
+          <div className="bg-white rounded-xl border border-gray-200 text-center py-16">
+            <BookOpen className="w-12 h-12 text-gray-200 mx-auto mb-3" />
+            <p className="text-gray-500 font-medium">Nenhuma rubrica encontrada</p>
+          </div>
+        ) : (
+          <>
+            {/* Cards (mobile) */}
+            <div className="sm:hidden space-y-3">
+              {rubricas.map((r) => (
+                <div key={r.id} className="bg-white rounded-xl border border-gray-200 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm font-mono font-bold text-gray-700">{r.codigo}</span>
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${tipoColor[r.tipo] ?? "bg-gray-100 text-gray-600"}`}>
+                          {r.tipo.replace("_", " ")}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-900 mt-1">{r.descricao}</p>
+                      {r.naturezaESocial && (
+                        <p className="text-xs text-gray-500 mt-0.5">eSocial: {r.naturezaESocial}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-center gap-4 text-xs text-gray-500 flex-wrap">
+                    <span className={r.incideINSS ? "text-green-600 font-medium" : "text-gray-300"}>INSS</span>
+                    <span className={r.incideFGTS ? "text-green-600 font-medium" : "text-gray-300"}>FGTS</span>
+                    <span className={r.incideIRRF ? "text-green-600 font-medium" : "text-gray-300"}>IRRF</span>
+                    <span className={r.incide13 ? "text-green-600 font-medium" : "text-gray-300"}>13º</span>
+                    <span className={r.incideFerias ? "text-green-600 font-medium" : "text-gray-300"}>Férias</span>
+                  </div>
+                </div>
+              ))}
+              <p className="text-xs text-gray-400 text-center pt-1">{rubricas.length} rubricas configuradas</p>
             </div>
-          ) : (
-            <>
+
+            {/* Tabela (tablet/desktop) */}
+            <div className="hidden sm:block bg-white rounded-xl border border-gray-200 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[680px]">
                   <thead className="bg-gray-50 border-b border-gray-200">
@@ -130,9 +161,9 @@ export default async function RubricasPage({
                 <p className="text-xs text-gray-500">{rubricas.length} rubricas configuradas</p>
                 <p className="text-xs text-gray-400">Vinculadas à Tabela 03 do eSocial S-1.3</p>
               </div>
-            </>
-          )}
-        </div>
+            </div>
+          </>
+        )}
 
       </div>
     </>

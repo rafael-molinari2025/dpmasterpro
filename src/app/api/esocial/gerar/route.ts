@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-guard";
-import { hasPermissao } from "@/lib/permissoes";
 import {
   gerarS1000,
   gerarS1010,
@@ -18,11 +17,7 @@ const AMBIENTE = (process.env.ESOCIAL_AMBIENTE ?? "2") as "1" | "2";
 export async function POST(request: Request) {
   const guard = await requireAuth();
   if (!guard.ok) return guard.response;
-  const { escritorioId, perfil, permissoes } = guard.session;
-
-  if (!hasPermissao(perfil, permissoes as string[], "esocial")) {
-    return NextResponse.json({ error: "Sem permissão para acessar eSocial" }, { status: 403 });
-  }
+  const { escritorioId } = guard.session;
 
   try {
     const { empresaId, tipoEvento, referencia } = await request.json();

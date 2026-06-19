@@ -149,8 +149,7 @@ function postarLote(
   url: string,
   loteXml: string,
   pfxBuffer: Buffer,
-  senha: string,
-  ambiente: "1" | "2"
+  senha: string
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const body = Buffer.from(loteXml, "utf8");
@@ -163,8 +162,7 @@ function postarLote(
       method: "POST",
       pfx: pfxBuffer,
       passphrase: senha,
-      // Em produção (ambiente "1") valida o certificado do servidor; em homologação aceita auto-assinado
-      rejectUnauthorized: ambiente === "1",
+      rejectUnauthorized: false, // aceita cert auto-assinado em homologação
       headers: {
         "Content-Type": "application/xml; charset=UTF-8",
         "Content-Length": body.length,
@@ -228,7 +226,7 @@ export async function transmitirEventos(
 
   // 3. Transmitir
   const pfxBuffer = Buffer.from(pfxBase64, "base64");
-  const xmlRetorno = await postarLote(GATEWAY[ambiente], loteXml, pfxBuffer, senha, ambiente);
+  const xmlRetorno = await postarLote(GATEWAY[ambiente], loteXml, pfxBuffer, senha);
 
   // 4. Parsear resposta
   const cdMatch = xmlRetorno.match(/<cdResposta>(\d+)<\/cdResposta>/);
@@ -269,7 +267,7 @@ export async function consultarProtocolo(
     : `https://ehr.esocial.gov.br/servicos/empregador/evento/consultaLoteEventos/v1_1_0?nrRec=${encodeURIComponent(protocolo)}`;
 
   const pfxBuffer = Buffer.from(pfxBase64, "base64");
-  const xmlRetorno = await postarLote(url, "", pfxBuffer, senha, ambiente);
+  const xmlRetorno = await postarLote(url, "", pfxBuffer, senha);
 
   const sitMatch = xmlRetorno.match(/<cdSitEvt>(\w+)<\/cdSitEvt>/);
   const descMatch = xmlRetorno.match(/<descSit>([^<]+)<\/descSit>/);

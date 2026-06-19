@@ -29,7 +29,7 @@ export default async function ESocialMonitorPage() {
   return (
     <>
       <Header title="Monitor eSocial" subtitle={`Ambiente: ${ambiente} — Status em tempo real`} />
-      <div className="flex-1 p-3 sm:p-6 space-y-6">
+      <div className="flex-1 p-6 space-y-6">
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[

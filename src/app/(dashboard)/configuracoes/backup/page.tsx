@@ -27,7 +27,7 @@ export default async function BackupPage() {
   return (
     <>
       <Header title="Backup e Dados" subtitle="Exporte seus dados para backup ou migração" />
-      <div className="flex-1 p-6 space-y-6">
+      <div className="flex-1 p-3 sm:p-6 space-y-6">
         <div className="flex items-center gap-2 mb-2 text-sm text-gray-500">
           <Link href="/configuracoes" className="flex items-center gap-1.5 hover:text-blue-600 transition-colors">
             <ArrowLeft className="w-4 h-4" />

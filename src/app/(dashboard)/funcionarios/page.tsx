@@ -130,15 +130,59 @@ export default async function FuncionariosPage({
           ))}
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          {funcionarios.length === 0 ? (
-            <div className="text-center py-16">
-              <Users className="w-12 h-12 text-gray-200 mx-auto mb-3" />
-              <p className="text-gray-500 font-medium">Nenhum funcionário encontrado</p>
-              <p className="text-sm text-gray-400 mt-1">Ajuste os filtros ou cadastre um novo funcionário.</p>
+        {funcionarios.length === 0 ? (
+          <div className="bg-white rounded-xl border border-gray-200 text-center py-16">
+            <Users className="w-12 h-12 text-gray-200 mx-auto mb-3" />
+            <p className="text-gray-500 font-medium">Nenhum funcionário encontrado</p>
+            <p className="text-sm text-gray-400 mt-1">Ajuste os filtros ou cadastre um novo funcionário.</p>
+          </div>
+        ) : (
+          <>
+            {/* Cards (mobile) */}
+            <div className="sm:hidden space-y-3">
+              {funcionarios.map((f) => (
+                <div key={f.id} className="bg-white rounded-xl border border-gray-200 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 text-xs font-bold flex-shrink-0">
+                        {f.nome.split(" ").map((n: string) => n[0]).slice(0, 2).join("")}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 truncate">{f.nome}</p>
+                        <p className="text-xs text-gray-400">{mascaraCPF(f.cpf)}</p>
+                        <p className="text-xs text-gray-500 font-mono mt-0.5">Matr. {f.matricula}</p>
+                      </div>
+                    </div>
+                    <Link
+                      href={`/funcionarios/${f.id}`}
+                      className="flex-shrink-0 flex items-center gap-1 text-xs text-gray-500 hover:text-blue-600 px-2 py-1.5 rounded-lg border border-gray-200 hover:border-blue-200 hover:bg-blue-50 transition-colors"
+                    >
+                      <Settings className="w-3.5 h-3.5" />
+                      Editar
+                    </Link>
+                  </div>
+                  <div className="mt-3 space-y-1.5 text-xs text-gray-600">
+                    <p><span className="text-gray-400">Cargo:</span> {f.cargo?.descricao ?? "—"}</p>
+                    <p><span className="text-gray-400">Setor:</span> {f.setor?.descricao ?? "—"}</p>
+                    <p><span className="text-gray-400">Empresa:</span> {f.empresa.nomeFantasia ?? f.empresa.razaoSocial}</p>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between">
+                    <p className="text-sm font-bold text-gray-900">
+                      R$ {parseFloat(f.salario.toString()).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                    </p>
+                    <span className={`text-xs px-2 py-1 rounded-full ${situacaoStyle[f.situacao] ?? "bg-gray-100 text-gray-600"}`}>
+                      {situacaoLabel[f.situacao] ?? f.situacao}
+                    </span>
+                  </div>
+                </div>
+              ))}
+              <p className="text-xs text-gray-400 text-center pt-1">
+                {funcionarios.length} funcionário{funcionarios.length !== 1 ? "s" : ""} encontrado{funcionarios.length !== 1 ? "s" : ""}
+              </p>
             </div>
-          ) : (
-            <>
+
+            {/* Tabela (tablet/desktop) */}
+            <div className="hidden sm:block bg-white rounded-xl border border-gray-200 overflow-hidden">
               <div className="overflow-x-auto">
               <table className="w-full min-w-[700px]">
                 <thead className="bg-gray-50 border-b border-gray-200">
@@ -199,9 +243,9 @@ export default async function FuncionariosPage({
               <div className="px-5 py-3 border-t border-gray-100">
                 <p className="text-xs text-gray-500">{funcionarios.length} funcionário{funcionarios.length !== 1 ? "s" : ""} encontrado{funcionarios.length !== 1 ? "s" : ""}</p>
               </div>
-            </>
-          )}
-        </div>
+            </div>
+          </>
+        )}
 
       </div>
     </>

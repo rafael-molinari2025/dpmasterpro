@@ -45,7 +45,20 @@ export default async function TabelaFGTSPage() {
               <Percent className="w-4 h-4 text-blue-600" />
               <h2 className="font-semibold text-gray-900">Alíquotas por Categoria</h2>
             </div>
-            <div className="overflow-x-auto">
+            {/* Cards (mobile) */}
+            <div className="sm:hidden divide-y divide-gray-100">
+              {aliquotas.map((a) => (
+                <div key={a.categoria} className="px-5 py-3 flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-gray-700">{a.categoria}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">{a.obs}</p>
+                  </div>
+                  <span className="flex-shrink-0 text-sm font-bold text-blue-700">{a.aliquota}</span>
+                </div>
+              ))}
+            </div>
+            {/* Tabela (tablet/desktop) */}
+            <div className="hidden sm:block overflow-x-auto">
             <table className="w-full min-w-[400px]">
               <thead className="bg-gray-50">
                 <tr>

@@ -263,7 +263,31 @@ export default async function HoleritePage({
             </div>
 
             {/* Itens */}
-            <div className="px-6 py-4 overflow-x-auto">
+            <div className="px-4 sm:px-6 py-4">
+              {/* Lista (mobile) */}
+              <div className="sm:hidden divide-y divide-gray-50">
+                {grupo.itens.map((item) => (
+                  <div key={item.id} className="py-2 flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-xs font-mono text-gray-400">{item.rubrica?.codigo ?? "—"}</p>
+                      <p className="text-xs text-gray-700 truncate">{item.descricao}</p>
+                    </div>
+                    <span className={`text-xs font-medium flex-shrink-0 ${item.tipo === "PROVENTO" ? "text-green-700" : "text-red-600"}`}>
+                      {item.tipo === "PROVENTO" ? "+" : "-"}{fmt(parseFloat(item.valor.toString()))}
+                    </span>
+                  </div>
+                ))}
+                <div className="pt-2 flex justify-between text-xs font-bold border-t-2 border-gray-300 mt-1">
+                  <span className="text-gray-500">Proventos</span>
+                  <span className="text-green-700">R$ {fmt(grupo.totalProventos)}</span>
+                </div>
+                <div className="py-1 flex justify-between text-xs font-bold">
+                  <span className="text-gray-500">Descontos</span>
+                  <span className="text-red-600">R$ {fmt(grupo.totalDescontos)}</span>
+                </div>
+              </div>
+              {/* Tabela (tablet/desktop) */}
+              <div className="hidden sm:block overflow-x-auto">
               <table className="w-full text-xs min-w-[500px]">
                 <thead>
                   <tr className="border-b border-gray-200">
@@ -301,6 +325,7 @@ export default async function HoleritePage({
                   </tr>
                 </tfoot>
               </table>
+              </div>
             </div>
 
             {/* Rodapé */}

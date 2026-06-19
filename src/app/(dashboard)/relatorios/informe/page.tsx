@@ -71,10 +71,10 @@ export default async function InformeRendimentosPage({
   return (
     <>
       <Header title="Informe de Rendimentos" subtitle={`Ano-calendário ${ano}`} />
-      <div className="flex-1 p-6 space-y-6">
+      <div className="flex-1 p-3 sm:p-6 space-y-6">
 
-        <form method="GET" className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <form method="GET" className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <select
               name="empresaId"
               defaultValue={empresaId ?? ""}
@@ -120,7 +120,31 @@ export default async function InformeRendimentosPage({
             </div>
           ) : (
             <>
-              <table className="w-full">
+              {/* Cards (mobile) */}
+              <div className="sm:hidden divide-y divide-gray-100">
+                {funcionariosLista.map(([id, f]) => (
+                  <div key={id} className="p-4">
+                    <div className="flex items-start justify-between gap-3 mb-1">
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 truncate">{f.nome}</p>
+                        <p className="text-xs font-mono text-gray-400">{mascaraCPF(f.cpf)} · {f.matricula}</p>
+                      </div>
+                      <button type="button" className="flex-shrink-0 flex items-center gap-1 text-xs text-blue-600 hover:underline">
+                        <Download className="w-3 h-3" />
+                        PDF
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 text-xs text-gray-600 mt-2">
+                      <p><span className="text-gray-400">Rendimentos:</span><br />R$ {fmt(f.rendimentos)}</p>
+                      <p><span className="text-gray-400">INSS:</span><br />R$ {fmt(f.inss)}</p>
+                      <p><span className="text-gray-400">IRRF:</span><br />R$ {fmt(f.irrf)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {/* Tabela (tablet/desktop) */}
+              <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full min-w-[600px]">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
                     <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Matrícula</th>
@@ -151,6 +175,7 @@ export default async function InformeRendimentosPage({
                   ))}
                 </tbody>
               </table>
+              </div>
               <div className="px-5 py-3 border-t border-gray-100">
                 <p className="text-xs text-gray-500">{funcionariosLista.length} informe{funcionariosLista.length !== 1 ? "s" : ""} — Ano-calendário {ano}</p>
               </div>

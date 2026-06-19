@@ -120,22 +120,70 @@ export default async function GuiasPage({
         </form>
 
         {/* Table */}
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          {guias.length === 0 ? (
-            <div className="text-center py-16">
-              <p className="text-gray-500 font-medium">Nenhuma guia encontrada</p>
-              <p className="text-sm text-gray-400 mt-1">
-                As guias são geradas automaticamente ao processar a folha de pagamento.
+        {guias.length === 0 ? (
+          <div className="bg-white rounded-xl border border-gray-200 text-center py-16">
+            <p className="text-gray-500 font-medium">Nenhuma guia encontrada</p>
+            <p className="text-sm text-gray-400 mt-1">
+              As guias são geradas automaticamente ao processar a folha de pagamento.
+            </p>
+            <Link
+              href="/folha/processar"
+              className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
+            >
+              Processar Folha
+            </Link>
+          </div>
+        ) : (
+          <>
+            {/* Cards (mobile) */}
+            <div className="sm:hidden space-y-3">
+              {guias.map((g) => {
+                const info = tipoGuiaInfo[g.tipo] ?? { label: g.tipo, cor: "bg-gray-50 text-gray-700 border-gray-200" };
+                const [ano, mes] = g.competencia.split("-");
+                return (
+                  <div key={g.id} className="bg-white rounded-xl border border-gray-200 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <span className={`text-xs font-medium px-2 py-1 rounded-full border ${info.cor}`}>
+                          {info.label}
+                        </span>
+                        <p className="text-sm font-medium text-gray-800 mt-2 truncate">
+                          {g.empresa.nomeFantasia ?? g.empresa.razaoSocial}
+                        </p>
+                      </div>
+                      {g.status === "PAGO" ? (
+                        <span className="flex-shrink-0 flex items-center gap-1 text-xs text-green-700 bg-green-50 px-2 py-1 rounded-full">
+                          <CheckCircle className="w-3 h-3" /> Pago
+                        </span>
+                      ) : g.status === "VENCIDA" ? (
+                        <span className="flex-shrink-0 flex items-center gap-1 text-xs text-red-700 bg-red-50 px-2 py-1 rounded-full">
+                          <AlertTriangle className="w-3 h-3" /> Vencida
+                        </span>
+                      ) : (
+                        <span className="flex-shrink-0 flex items-center gap-1 text-xs text-amber-700 bg-amber-50 px-2 py-1 rounded-full">
+                          <Clock className="w-3 h-3" /> Pendente
+                        </span>
+                      )}
+                    </div>
+                    <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-gray-600">
+                      <p><span className="text-gray-400">Competência:</span> {mes}/{ano}</p>
+                      <p><span className="text-gray-400">Vencimento:</span> {g.dataVencimento.toLocaleDateString("pt-BR")}</p>
+                    </div>
+                    <div className="mt-3 flex items-center justify-between">
+                      <p className="text-base font-bold text-gray-900">R$ {fmt(parseFloat(g.valorTotal.toString()))}</p>
+                      <GuiaLinhaAcoes guiaId={g.id} status={g.status} />
+                    </div>
+                  </div>
+                );
+              })}
+              <p className="text-xs text-gray-400 text-center pt-1">
+                {guias.length} guia{guias.length !== 1 ? "s" : ""}
+                {totalPendente > 0 && ` • ${pendentes.length} pendente${pendentes.length !== 1 ? "s" : ""}: R$ ${fmt(totalPendente)}`}
               </p>
-              <Link
-                href="/folha/processar"
-                className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
-              >
-                Processar Folha
-              </Link>
             </div>
-          ) : (
-            <>
+
+            {/* Tabela (tablet/desktop) */}
+            <div className="hidden sm:block bg-white rounded-xl border border-gray-200 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[650px]">
                   <thead className="bg-gray-50 border-b border-gray-200">
@@ -204,9 +252,9 @@ export default async function GuiasPage({
                   </p>
                 )}
               </div>
-            </>
-          )}
-        </div>
+            </div>
+          </>
+        )}
 
         <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
           <p className="text-sm font-medium text-emerald-800 mb-1">FGTS Digital 2026 — Exclusivo PIX</p>

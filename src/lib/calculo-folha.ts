@@ -104,8 +104,7 @@ export function calcularRescisao(params: {
   const diasAviso = Math.min(90, 30 + 3 * Math.min(anos, 20));
 
   // Verbas
-  const diasNoMes = new Date(dataDemissao.getFullYear(), dataDemissao.getMonth() + 1, 0).getDate();
-  const saldoSalario = arredondar((salario / diasNoMes) * diasTrabalhados);
+  const saldoSalario = arredondar((salario / 30) * diasTrabalhados);
   const decimo13 = arredondar((salario / 12) * meses13);
   const feriasPropor = arredondar((salario / 12) * mesesFeriasAquisitivos * (4 / 3));
   const fgtsEstimado = arredondar(salario * 0.08 * mesesTotal);

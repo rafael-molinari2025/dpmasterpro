@@ -71,7 +71,26 @@ export default function TabelaINSSPage() {
               <h2 className="font-semibold text-gray-900">Tabela INSS 2026 — Progressiva</h2>
               <p className="text-xs text-gray-500 mt-0.5">Teto de contribuição: R$ 8.157,41 | Contribuição máxima: R$ 951,55</p>
             </div>
-            <div className="overflow-x-auto">
+            {/* Cards (mobile) */}
+            <div className="sm:hidden divide-y divide-gray-100">
+              {tabelaINSS2026.map((row) => (
+                <div key={row.faixa} className="px-5 py-3">
+                  <div className="flex items-center justify-between gap-3 mb-1">
+                    <p className="text-sm font-medium text-gray-700">{row.faixa}</p>
+                    <span className="text-sm font-bold text-blue-700">{row.aliquota}%</span>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    R$ {row.de.toLocaleString("pt-BR", { minimumFractionDigits: 2 })} – R$ {row.ate.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                  </p>
+                  <p className="text-xs text-gray-600 mt-0.5">Teto: R$ {row.teto.toFixed(2).replace(".", ",")}</p>
+                </div>
+              ))}
+              <div className="px-5 py-3 bg-blue-50">
+                <p className="text-xs font-bold text-blue-900 text-right">Contribuição Máxima: R$ 951,55</p>
+              </div>
+            </div>
+            {/* Tabela (tablet/desktop) */}
+            <div className="hidden sm:block overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>
@@ -117,7 +136,22 @@ export default function TabelaINSSPage() {
               <h2 className="font-semibold text-gray-900">Tabela IRRF 2026</h2>
               <p className="text-xs text-gray-500 mt-0.5">Dedução por dependente: R$ 189,59 | Isento até R$ 5.000,00</p>
             </div>
-            <div className="overflow-x-auto">
+            {/* Cards (mobile) */}
+            <div className="sm:hidden divide-y divide-gray-100">
+              {tabelaIRRF2026.map((row, i) => (
+                <div key={i} className="px-5 py-3 flex items-start justify-between gap-3">
+                  <p className="text-sm text-gray-700 flex-1">{row.base}</p>
+                  <div className="flex-shrink-0 text-right">
+                    <span className={`text-sm font-bold ${row.aliquota === "Isento" ? "text-green-600" : "text-orange-600"}`}>
+                      {row.aliquota}
+                    </span>
+                    {row.deducao !== "—" && <p className="text-xs text-gray-500 mt-0.5">{row.deducao}</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* Tabela (tablet/desktop) */}
+            <div className="hidden sm:block overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>

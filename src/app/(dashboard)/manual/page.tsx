@@ -17,7 +17,7 @@ export default function ManualPage() {
         }
       `}</style>
 
-      <div className="flex-1 p-6 print:p-0">
+      <div className="flex-1 p-3 sm:p-6 print:p-0">
         {/* Toolbar — oculta ao imprimir */}
         <div className="flex items-center justify-between mb-6 print:hidden">
           <p className="text-sm text-gray-500">

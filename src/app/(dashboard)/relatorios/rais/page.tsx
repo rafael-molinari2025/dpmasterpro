@@ -166,7 +166,24 @@ export default async function RAISPage({
               <Building2 className="w-4 h-4 text-blue-600" />
               <h2 className="font-semibold text-gray-900">Resumo por Empresa — {ano}</h2>
             </div>
-            <div className="overflow-x-auto">
+            {/* Cards (mobile) */}
+            <div className="sm:hidden divide-y divide-gray-100">
+              {porEmpresa.map(({ emp, total, admitidos, demitidos, ativos: atv, massa }) => (
+                <div key={emp.id} className="p-4 space-y-2">
+                  <p className="text-sm font-semibold text-gray-900">{emp.nomeFantasia ?? emp.razaoSocial}</p>
+                  <p className="text-xs font-mono text-gray-400">{emp.cnpj}</p>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <p><span className="text-gray-400">Total:</span> <span className="font-medium">{total}</span></p>
+                    <p><span className="text-gray-400">Admitidos:</span> <span className="text-green-700 font-medium">{admitidos}</span></p>
+                    <p><span className="text-gray-400">Demitidos:</span> <span className="text-red-700 font-medium">{demitidos}</span></p>
+                    <p><span className="text-gray-400">Ativos 31/12:</span> <span className="text-blue-700 font-medium">{atv}</span></p>
+                  </div>
+                  <p className="text-sm font-bold text-gray-900">Massa: R$ {fmt(massa)}</p>
+                </div>
+              ))}
+            </div>
+            {/* Tabela (tablet/desktop) */}
+            <div className="hidden sm:block overflow-x-auto">
               <table className="w-full min-w-[700px]">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
@@ -226,7 +243,35 @@ export default async function RAISPage({
               </h2>
               <span className="text-xs text-gray-500">{funcNoAno.length} vínculo{funcNoAno.length !== 1 ? "s" : ""}</span>
             </div>
-            <div className="overflow-x-auto">
+            {/* Cards (mobile) */}
+            <div className="sm:hidden divide-y divide-gray-100">
+              {funcNoAno.map((f) => (
+                <div key={f.id} className="p-4 space-y-1">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-gray-900 truncate">{f.nome}</p>
+                      <p className="text-xs text-gray-400 truncate">{f.empresa.nomeFantasia ?? f.empresa.razaoSocial}</p>
+                    </div>
+                    <span className={`flex-shrink-0 text-xs px-2 py-0.5 rounded-full ${
+                      f.situacao === "ATIVO" ? "bg-green-50 text-green-700"
+                      : f.situacao === "DEMITIDO" ? "bg-red-50 text-red-700"
+                      : f.situacao === "FERIAS" ? "bg-blue-50 text-blue-700"
+                      : "bg-amber-50 text-amber-700"
+                    }`}>
+                      {f.situacao}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-1 text-xs text-gray-600 mt-2">
+                    <p><span className="text-gray-400">Cargo:</span> {f.cargo?.descricao ?? "—"}</p>
+                    <p><span className="text-gray-400">Salário:</span> R$ {fmt(parseFloat(f.salario.toString()))}</p>
+                    <p><span className="text-gray-400">Admissão:</span> {new Date(f.dataAdmissao).toLocaleDateString("pt-BR", { timeZone: "UTC" })}</p>
+                    <p><span className="text-gray-400">Demissão:</span> {f.dataDemissao ? new Date(f.dataDemissao).toLocaleDateString("pt-BR", { timeZone: "UTC" }) : "—"}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* Tabela (tablet/desktop) */}
+            <div className="hidden sm:block overflow-x-auto">
               <table className="w-full min-w-[700px]">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>

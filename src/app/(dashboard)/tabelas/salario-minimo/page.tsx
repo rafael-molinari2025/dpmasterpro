@@ -73,7 +73,26 @@ export default async function SalarioMinimoPage() {
             <TrendingUp className="w-4 h-4 text-blue-600" />
             <h2 className="font-semibold text-gray-900">Histórico de Reajustes</h2>
           </div>
-          <div className="overflow-x-auto">
+          {/* Cards (mobile) */}
+          <div className="sm:hidden divide-y divide-gray-100">
+            {historico.map((h) => (
+              <div key={h.ano} className={`px-5 py-3 ${h.ano === 2026 ? "bg-green-50" : ""}`}>
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-bold text-gray-800">{h.ano}</p>
+                    {h.ano === 2026 && <span className="text-xs text-green-700 bg-green-100 px-1.5 py-0.5 rounded">Vigente</span>}
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-medium text-gray-900">R$ {fmt(h.valor)}</p>
+                    <span className="text-xs font-bold text-green-600">{h.reajuste}</span>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Vigência: {h.vigencia} · {h.lei}</p>
+              </div>
+            ))}
+          </div>
+          {/* Tabela (tablet/desktop) */}
+          <div className="hidden sm:block overflow-x-auto">
           <table className="w-full min-w-[480px]">
             <thead className="bg-gray-50">
               <tr>
