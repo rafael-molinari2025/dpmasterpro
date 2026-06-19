@@ -3,7 +3,8 @@ import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 import Header from "@/components/layout/Header";
 import Link from "next/link";
-import { Play, Lock, Send, Download, Plus, AlertCircle, CheckCircle, Clock } from "lucide-react";
+import { Play, Download, Plus, AlertCircle, CheckCircle, Clock } from "lucide-react";
+import FolhaLinhaAcoes from "./FolhaLinhaAcoes";
 
 function fmt(v: number) {
   return v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -35,7 +36,10 @@ export default async function FolhaPage({
         competencia,
         ...(empresaId && { empresaId }),
       },
-      include: { empresa: { select: { razaoSocial: true, nomeFantasia: true } } },
+      include: {
+        empresa: { select: { razaoSocial: true, nomeFantasia: true } },
+        guias: { select: { id: true }, take: 1 },
+      },
       orderBy: { createdAt: "desc" },
     }),
     db.empresa.findMany({
@@ -83,10 +87,10 @@ export default async function FolhaPage({
               Filtrar
             </button>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <Link
               href={`/folha/processar${empresaId ? `?empresaId=${empresaId}` : ""}`}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition-colors whitespace-nowrap"
             >
               <Play className="w-4 h-4" />
               Processar Folha
@@ -137,63 +141,109 @@ export default async function FolhaPage({
               </Link>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-            <table className="w-full min-w-[650px]">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Empresa</th>
-                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Tipo</th>
-                  <th className="text-right px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Proventos</th>
-                  <th className="text-right px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Descontos</th>
-                  <th className="text-right px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Líquido</th>
-                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Status</th>
-                  <th className="px-5 py-3">
-                    <button className="flex items-center gap-1.5 text-xs text-amber-600 hover:underline ml-auto">
-                      <Lock className="w-3 h-3" />
-                      Fechar Folha
-                    </button>
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
+            <>
+              {/* Cards (mobile) */}
+              <div className="sm:hidden divide-y divide-gray-100">
                 {folhas.map((f) => {
                   const s = statusConfig[f.status] ?? statusConfig["ABERTA"];
                   const StatusIcon = s.icon;
                   return (
-                    <tr key={f.id} className="hover:bg-gray-50">
-                      <td className="px-5 py-4 text-sm text-gray-900 font-medium">
-                        {f.empresa.nomeFantasia ?? f.empresa.razaoSocial}
-                      </td>
-                      <td className="px-5 py-4">
-                        <span className="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-700">{f.tipo}</span>
-                      </td>
-                      <td className="px-5 py-4 text-sm text-right text-gray-900">
-                        R$ {fmt(parseFloat(f.totalProventos.toString()))}
-                      </td>
-                      <td className="px-5 py-4 text-sm text-right text-red-700">
-                        R$ {fmt(parseFloat(f.totalDescontos.toString()))}
-                      </td>
-                      <td className="px-5 py-4 text-sm text-right font-bold text-gray-900">
-                        R$ {fmt(parseFloat(f.totalLiquido.toString()))}
-                      </td>
-                      <td className="px-5 py-4">
-                        <span className={`flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-full w-fit ${s.color}`}>
+                    <div key={f.id} className="p-4 space-y-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-gray-900 truncate">
+                            {f.empresa.nomeFantasia ?? f.empresa.razaoSocial}
+                          </p>
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">{f.tipo}</span>
+                        </div>
+                        <span className={`flex-shrink-0 flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full ${s.color}`}>
                           <StatusIcon className="w-3 h-3" />
                           {s.label}
                         </span>
-                      </td>
-                      <td className="px-5 py-4">
-                        <button className="flex items-center gap-1.5 text-xs text-blue-600 hover:underline">
-                          <Send className="w-3 h-3" />
-                          eSocial
-                        </button>
-                      </td>
-                    </tr>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div>
+                          <p className="text-gray-400">Proventos</p>
+                          <p className="font-medium text-gray-900">R$ {fmt(parseFloat(f.totalProventos.toString()))}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-400">Descontos</p>
+                          <p className="font-medium text-red-700">R$ {fmt(parseFloat(f.totalDescontos.toString()))}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-400">Líquido</p>
+                          <p className="font-bold text-gray-900">R$ {fmt(parseFloat(f.totalLiquido.toString()))}</p>
+                        </div>
+                      </div>
+                      <FolhaLinhaAcoes
+                        folhaId={f.id}
+                        status={f.status}
+                        empresaId={f.empresaId}
+                        competencia={f.competencia}
+                        temGuias={(f as any).guias?.length > 0}
+                      />
+                    </div>
                   );
                 })}
-              </tbody>
-            </table>
-            </div>
+              </div>
+
+              {/* Tabela (tablet/desktop) */}
+              <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full min-w-[650px]">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Empresa</th>
+                    <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Tipo</th>
+                    <th className="text-right px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Proventos</th>
+                    <th className="text-right px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Descontos</th>
+                    <th className="text-right px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Líquido</th>
+                    <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Status</th>
+                    <th className="px-5 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wide">Ações</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {folhas.map((f) => {
+                    const s = statusConfig[f.status] ?? statusConfig["ABERTA"];
+                    const StatusIcon = s.icon;
+                    return (
+                      <tr key={f.id} className="hover:bg-gray-50">
+                        <td className="px-5 py-4 text-sm text-gray-900 font-medium">
+                          {f.empresa.nomeFantasia ?? f.empresa.razaoSocial}
+                        </td>
+                        <td className="px-5 py-4">
+                          <span className="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-700">{f.tipo}</span>
+                        </td>
+                        <td className="px-5 py-4 text-sm text-right text-gray-900">
+                          R$ {fmt(parseFloat(f.totalProventos.toString()))}
+                        </td>
+                        <td className="px-5 py-4 text-sm text-right text-red-700">
+                          R$ {fmt(parseFloat(f.totalDescontos.toString()))}
+                        </td>
+                        <td className="px-5 py-4 text-sm text-right font-bold text-gray-900">
+                          R$ {fmt(parseFloat(f.totalLiquido.toString()))}
+                        </td>
+                        <td className="px-5 py-4">
+                          <span className={`flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-full w-fit ${s.color}`}>
+                            <StatusIcon className="w-3 h-3" />
+                            {s.label}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4">
+                          <FolhaLinhaAcoes
+                            folhaId={f.id}
+                            status={f.status}
+                            empresaId={f.empresaId}
+                            competencia={f.competencia}
+                            temGuias={(f as any).guias?.length > 0}
+                          />
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+              </div>
+            </>
           )}
         </div>
 

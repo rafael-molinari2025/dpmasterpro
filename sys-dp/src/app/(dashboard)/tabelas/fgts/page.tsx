@@ -26,7 +26,7 @@ export default async function TabelaFGTSPage() {
   return (
     <>
       <Header title="FGTS 2026" subtitle="Alíquotas, prazos e regras do Fundo de Garantia" />
-      <div className="flex-1 p-6 space-y-6">
+      <div className="flex-1 p-3 sm:p-6 space-y-6">
 
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-3">
           <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
@@ -45,7 +45,21 @@ export default async function TabelaFGTSPage() {
               <Percent className="w-4 h-4 text-blue-600" />
               <h2 className="font-semibold text-gray-900">Alíquotas por Categoria</h2>
             </div>
-            <table className="w-full">
+            {/* Cards (mobile) */}
+            <div className="sm:hidden divide-y divide-gray-100">
+              {aliquotas.map((a) => (
+                <div key={a.categoria} className="px-5 py-3 flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-gray-700">{a.categoria}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">{a.obs}</p>
+                  </div>
+                  <span className="flex-shrink-0 text-sm font-bold text-blue-700">{a.aliquota}</span>
+                </div>
+              ))}
+            </div>
+            {/* Tabela (tablet/desktop) */}
+            <div className="hidden sm:block overflow-x-auto">
+            <table className="w-full min-w-[400px]">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Categoria</th>
@@ -65,6 +79,7 @@ export default async function TabelaFGTSPage() {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
 
           <div className="bg-white rounded-xl border border-gray-200">
@@ -85,7 +100,7 @@ export default async function TabelaFGTSPage() {
 
         <div className="bg-white rounded-xl border border-gray-200 p-5">
           <h3 className="font-semibold text-gray-900 mb-4">Bases de Incidência do FGTS</h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
               { label: "Salário mensal", incide: true },
               { label: "13º salário", incide: true },

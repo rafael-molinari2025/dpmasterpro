@@ -103,7 +103,28 @@ export default function ImportacaoPage() {
           <div className="px-5 py-4 border-b border-gray-100">
             <h2 className="font-semibold text-gray-900">Histórico de Importações</h2>
           </div>
-          <div className="overflow-x-auto">
+          {/* Cards (mobile) */}
+          <div className="sm:hidden divide-y divide-gray-100">
+            {historico.map((h, i) => (
+              <div key={i} className="p-4 flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-gray-800 truncate">{h.arquivo}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">{h.tipo} · {h.registros} registros · {h.data}</p>
+                </div>
+                {h.status === "sucesso" ? (
+                  <span className="flex-shrink-0 flex items-center gap-1 text-xs text-green-700">
+                    <CheckCircle className="w-3.5 h-3.5" /> Sucesso
+                  </span>
+                ) : (
+                  <span className="flex-shrink-0 flex items-center gap-1 text-xs text-amber-700">
+                    <AlertTriangle className="w-3.5 h-3.5" /> Avisos
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+          {/* Tabela (tablet/desktop) */}
+          <div className="hidden sm:block overflow-x-auto">
           <table className="w-full min-w-[500px]">
             <thead className="bg-gray-50">
               <tr>

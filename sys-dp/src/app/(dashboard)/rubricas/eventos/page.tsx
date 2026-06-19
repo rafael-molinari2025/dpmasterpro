@@ -40,9 +40,9 @@ export default async function RubricasEventosPage() {
   return (
     <>
       <Header title="Eventos eSocial" subtitle="Tabela 03 — Natureza das rubricas (eSocial S-1.3)" />
-      <div className="flex-1 p-6 space-y-6">
+      <div className="flex-1 p-3 sm:p-6 space-y-6">
 
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-sm text-gray-600">
             Referência: <strong>Tabela 03 do eSocial</strong> — Natureza das Rubricas da Folha de Pagamento
           </p>
@@ -58,7 +58,23 @@ export default async function RubricasEventosPage() {
         </div>
 
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="overflow-x-auto">
+          {/* Cards (mobile) */}
+          <div className="sm:hidden divide-y divide-gray-100">
+            {eventos.map((e) => (
+              <div key={e.codigo} className="p-4">
+                <div className="flex items-center justify-between gap-3 mb-1">
+                  <span className="text-sm font-mono font-bold text-blue-700">{e.codigo}</span>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${tipoColor[e.tipo]}`}>
+                    {e.tipo.replace("_", " ")}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-900">{e.descricao}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{e.exemplos}</p>
+              </div>
+            ))}
+          </div>
+          {/* Tabela (tablet/desktop) */}
+          <div className="hidden sm:block overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>

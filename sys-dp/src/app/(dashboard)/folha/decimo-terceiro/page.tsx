@@ -228,8 +228,45 @@ export default async function DecimoTerceiroPage({
             </div>
           ) : (
             <>
-              <div className="overflow-x-auto">
-                <table className="w-full">
+              {/* Cards (mobile) */}
+              <div className="sm:hidden divide-y divide-gray-100">
+                {parcelas.map((p) => (
+                  <div key={p.id} className="p-4">
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 truncate">{p.nome}</p>
+                        <p className="text-xs text-gray-500">{p.cargo} · <span className="font-mono">{p.matricula}</span></p>
+                      </div>
+                      <span className="flex-shrink-0 text-xs font-bold text-blue-700">{p.avos}/12</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-600">
+                      <p><span className="text-gray-400">Salário:</span> R$ {fmt(p.salario)}</p>
+                      <p><span className="text-gray-400">Bruto 13º:</span> R$ {fmt(p.valorBruto)}</p>
+                      <p><span className="text-gray-400">FGTS s/ 13º:</span> R$ {fmt(p.valorFGTS)}</p>
+                    </div>
+                    <p className="text-sm font-bold text-green-700 mt-1">
+                      {parcela === "1" ? "1ª Parcela" : "2ª Parcela"}: R$ {fmt(parcela === "1" ? p.valorPrimeiraParcela : p.valorSegundaParcela)}
+                    </p>
+                  </div>
+                ))}
+                <div className="p-4 bg-gray-50 space-y-1">
+                  <div className="flex justify-between text-xs text-gray-600">
+                    <span>Total Bruto 13º</span>
+                    <span className="font-bold text-gray-900">R$ {fmt(totalBruto)}</span>
+                  </div>
+                  <div className="flex justify-between text-xs text-gray-600">
+                    <span>FGTS Total</span>
+                    <span className="font-bold text-gray-700">R$ {fmt(totalFGTS)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm text-green-700 font-bold pt-1 border-t border-gray-200">
+                    <span>{parcela === "1" ? "1ª Parcela" : "2ª Parcela"} Total</span>
+                    <span>R$ {fmt(totalParcela)}</span>
+                  </div>
+                </div>
+              </div>
+              {/* Tabela (tablet/desktop) */}
+              <div className="hidden sm:block overflow-x-auto">
+                <table className="w-full min-w-[700px]">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
                       <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Matrícula</th>

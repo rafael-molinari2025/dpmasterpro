@@ -55,7 +55,22 @@ export default function TabelaIRRFPage() {
               <h2 className="font-semibold text-gray-900">Tabela Progressiva IRRF 2026</h2>
               <p className="text-xs text-gray-500 mt-0.5">Base: salário bruto − INSS − (dependentes × R$ 189,59)</p>
             </div>
-            <div className="overflow-x-auto">
+            {/* Cards (mobile) */}
+            <div className="sm:hidden divide-y divide-gray-100">
+              {tabelaIRRF2026.map((row, i) => (
+                <div key={i} className="px-5 py-3 flex items-start justify-between gap-3">
+                  <p className="text-sm text-gray-700 flex-1">{row.base}</p>
+                  <div className="flex-shrink-0 text-right">
+                    <span className={`text-sm font-bold ${row.aliquota === "Isento" ? "text-green-600" : "text-orange-600"}`}>
+                      {row.aliquota}
+                    </span>
+                    {row.deducao !== "—" && <p className="text-xs text-gray-500 mt-0.5">{row.deducao}</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* Tabela (tablet/desktop) */}
+            <div className="hidden sm:block overflow-x-auto">
             <table className="w-full min-w-[400px]">
               <thead className="bg-gray-50">
                 <tr>
@@ -94,7 +109,7 @@ export default function TabelaIRRFPage() {
                 <Calculator className="w-5 h-5 text-blue-600" />
                 <h2 className="font-semibold text-gray-900">Calcular IRRF</h2>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs text-gray-500 block mb-1">Salário Bruto (R$)</label>
                   <input

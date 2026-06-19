@@ -43,9 +43,9 @@ export default async function ESocialHistoricoPage({
   return (
     <>
       <Header title="Histórico de Envios eSocial" subtitle="Eventos enviados, com erro ou rejeitados" />
-      <div className="flex-1 p-6 space-y-6">
+      <div className="flex-1 p-3 sm:p-6 space-y-6">
 
-        <form method="GET" className="flex items-center gap-3">
+        <form method="GET" className="flex flex-wrap items-center gap-3">
           <select
             name="empresaId"
             defaultValue={empresaId ?? ""}
@@ -81,6 +81,30 @@ export default async function ESocialHistoricoPage({
             </div>
           ) : (
             <>
+              {/* Cards (mobile) */}
+              <div className="sm:hidden divide-y divide-gray-100">
+                {eventos.map((ev) => {
+                  const s = statusConfig[ev.status] ?? statusConfig["PENDENTE"];
+                  return (
+                    <div key={ev.id} className="p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <span className="text-xs font-mono font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded">{ev.tipoEvento}</span>
+                          <p className="text-sm text-gray-800 mt-1 truncate">{ev.descricao}</p>
+                          <p className="text-xs text-gray-500 mt-0.5 truncate">{ev.empresa.nomeFantasia ?? ev.empresa.razaoSocial}</p>
+                        </div>
+                        <span className={`flex-shrink-0 text-xs font-medium px-2 py-1 rounded-full ${s.bg} ${s.color}`}>{s.label}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs text-gray-400 mt-2">
+                        <span className="font-mono">{ev.protocolo ?? "—"}</span>
+                        <span>{ev.createdAt.toLocaleString("pt-BR")}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              {/* Tabela (tablet/desktop) */}
+              <div className="hidden sm:block overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
@@ -111,6 +135,7 @@ export default async function ESocialHistoricoPage({
                   })}
                 </tbody>
               </table>
+              </div>
               <div className="px-5 py-3 border-t border-gray-100">
                 <p className="text-xs text-gray-500">{eventos.length} evento{eventos.length !== 1 ? "s" : ""} no histórico</p>
               </div>

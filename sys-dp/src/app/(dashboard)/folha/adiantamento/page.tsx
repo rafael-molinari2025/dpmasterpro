@@ -181,7 +181,29 @@ export default async function AdiantamentoPage({
             </div>
           ) : (
             <>
-              <div className="overflow-x-auto">
+              {/* Cards (mobile) */}
+              <div className="sm:hidden divide-y divide-gray-100">
+                {adiantamentos.map((a) => (
+                  <div key={a.id} className="p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 truncate">{a.nome}</p>
+                        <p className="text-xs text-gray-500">{a.cargo} · <span className="font-mono">{a.matricula}</span></p>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <p className="text-sm font-bold text-green-700">R$ {fmt(a.valorAdiantamento)}</p>
+                        <p className="text-xs text-gray-400">{pct}% de R$ {fmt(a.salario)}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <div className="p-4 bg-gray-50 flex justify-between text-sm font-bold">
+                  <span className="text-gray-700">{adiantamentos.length} funcionário{adiantamentos.length !== 1 ? "s" : ""}</span>
+                  <span className="text-green-700">R$ {fmt(totalAdiantamento)}</span>
+                </div>
+              </div>
+              {/* Tabela (tablet/desktop) */}
+              <div className="hidden sm:block overflow-x-auto">
               <table className="w-full min-w-[550px]">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
