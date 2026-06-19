@@ -2,7 +2,8 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 import Header from "@/components/layout/Header";
-import { Receipt, Info, Copy } from "lucide-react";
+import { Receipt, Info } from "lucide-react";
+import CopiarPixButton from "../CopiarPixButton";
 
 function fmt(v: number) {
   return v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -47,7 +48,7 @@ export default async function GuiasFGTSPage({
   return (
     <>
       <Header title="FGTS Digital" subtitle="Recolhimento via Pix — FGTS Digital (gov.br)" />
-      <div className="flex-1 p-6 space-y-6">
+      <div className="flex-1 p-3 sm:p-6 space-y-6">
 
         <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex gap-3">
           <Info className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
@@ -57,23 +58,26 @@ export default async function GuiasFGTSPage({
           </p>
         </div>
 
-        <form method="GET" className="flex items-center justify-between">
-          <select
-            name="empresaId"
-            defaultValue={empresaId ?? ""}
-            className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Todas as empresas</option>
-            {empresas.map((e) => (
-              <option key={e.id} value={e.id}>{e.nomeFantasia ?? e.razaoSocial}</option>
-            ))}
-          </select>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <form method="GET" className="flex items-center gap-2">
+            <select
+              name="empresaId"
+              defaultValue={empresaId ?? ""}
+              className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Todas as empresas</option>
+              {empresas.map((e) => (
+                <option key={e.id} value={e.id}>{e.nomeFantasia ?? e.razaoSocial}</option>
+              ))}
+            </select>
+            <button type="submit" className="px-3 py-2 text-sm border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors">Filtrar</button>
+          </form>
           {totalPendente > 0 && (
             <div className="text-sm text-amber-700 bg-amber-50 px-4 py-2 rounded-lg border border-amber-200">
               Total pendente: <strong>R$ {fmt(totalPendente)}</strong>
             </div>
           )}
-        </form>
+        </div>
 
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           {guias.length === 0 ? (
@@ -84,7 +88,8 @@ export default async function GuiasFGTSPage({
             </div>
           ) : (
             <>
-              <table className="w-full">
+              <div className="overflow-x-auto">
+              <table className="w-full min-w-[560px]">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
                     <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Empresa</th>
@@ -108,10 +113,7 @@ export default async function GuiasFGTSPage({
                       </td>
                       <td className="px-5 py-4">
                         {g.pixCopiaCola ? (
-                          <button className="flex items-center gap-1 text-xs text-green-700 bg-green-50 px-2 py-1 rounded hover:bg-green-100 transition-colors">
-                            <Copy className="w-3 h-3" />
-                            Copiar Pix
-                          </button>
+                          <CopiarPixButton pixCopiaCola={g.pixCopiaCola} />
                         ) : (
                           <span className="text-xs text-gray-400">—</span>
                         )}
@@ -125,6 +127,7 @@ export default async function GuiasFGTSPage({
                   ))}
                 </tbody>
               </table>
+              </div>
               <div className="px-5 py-3 border-t border-gray-100">
                 <p className="text-xs text-gray-500">{guias.length} guia{guias.length !== 1 ? "s" : ""} FGTS Digital</p>
               </div>

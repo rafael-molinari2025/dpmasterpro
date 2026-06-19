@@ -3,7 +3,8 @@ import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 import Header from "@/components/layout/Header";
 import Link from "next/link";
-import { Play, Lock, Send, Download, Plus, AlertCircle, CheckCircle, Clock } from "lucide-react";
+import { Play, Download, Plus, AlertCircle, CheckCircle, Clock } from "lucide-react";
+import FolhaLinhaAcoes from "./FolhaLinhaAcoes";
 
 function fmt(v: number) {
   return v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -35,7 +36,10 @@ export default async function FolhaPage({
         competencia,
         ...(empresaId && { empresaId }),
       },
-      include: { empresa: { select: { razaoSocial: true, nomeFantasia: true } } },
+      include: {
+        empresa: { select: { razaoSocial: true, nomeFantasia: true } },
+        guias: { select: { id: true }, take: 1 },
+      },
       orderBy: { createdAt: "desc" },
     }),
     db.empresa.findMany({
@@ -83,10 +87,10 @@ export default async function FolhaPage({
               Filtrar
             </button>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <Link
               href={`/folha/processar${empresaId ? `?empresaId=${empresaId}` : ""}`}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition-colors whitespace-nowrap"
             >
               <Play className="w-4 h-4" />
               Processar Folha
@@ -147,12 +151,7 @@ export default async function FolhaPage({
                   <th className="text-right px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Descontos</th>
                   <th className="text-right px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Líquido</th>
                   <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Status</th>
-                  <th className="px-5 py-3">
-                    <button className="flex items-center gap-1.5 text-xs text-amber-600 hover:underline ml-auto">
-                      <Lock className="w-3 h-3" />
-                      Fechar Folha
-                    </button>
-                  </th>
+                  <th className="px-5 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wide">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -183,10 +182,13 @@ export default async function FolhaPage({
                         </span>
                       </td>
                       <td className="px-5 py-4">
-                        <button className="flex items-center gap-1.5 text-xs text-blue-600 hover:underline">
-                          <Send className="w-3 h-3" />
-                          eSocial
-                        </button>
+                        <FolhaLinhaAcoes
+                          folhaId={f.id}
+                          status={f.status}
+                          empresaId={f.empresaId}
+                          competencia={f.competencia}
+                          temGuias={(f as any).guias?.length > 0}
+                        />
                       </td>
                     </tr>
                   );

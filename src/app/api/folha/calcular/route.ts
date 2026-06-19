@@ -1,13 +1,18 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-guard";
+import { hasPermissao } from "@/lib/permissoes";
 import { calcularINSS, calcularIRRF, calcularFGTS } from "@/lib/calculos";
 import { registrarLog } from "@/lib/logger";
 
 export async function POST(request: Request) {
   const guard = await requireAuth();
   if (!guard.ok) return guard.response;
-  const { escritorioId } = guard.session;
+  const { escritorioId, perfil, permissoes } = guard.session;
+
+  if (!hasPermissao(perfil, permissoes as string[], "folha")) {
+    return NextResponse.json({ error: "Sem permissão para calcular folha" }, { status: 403 });
+  }
 
   try {
     const { empresaId, competencia, tipo = "NORMAL" } = await request.json();
@@ -71,7 +76,7 @@ export async function POST(request: Request) {
       const faixasINSS = (tabelaINSS?.faixas as any[]) ?? [];
       const resultINSS = calcularINSS(salario, faixasINSS.length ? faixasINSS : undefined);
       await db.itemFolha.create({
-        data: { folhaId: folha.id, funcionarioId: func.id, rubricaId: rubricaINSS.id, descricao: `INSS — ${resultINSS.aliquotaEfetiva}% ef.`, tipo: "DESCONTO", valor: resultINSS.valorDesconto, manual: false },
+        data: { folhaId: folha.id, funcionarioId: func.id, rubricaId: rubricaINSS.id, descricao: `INSS — ${resultINSS.aliquotaEfetiva}% ef.`, tipo: "DESCONTO", valor: resultINSS.valorDesconto, baseINSS: salario, manual: false },
       });
       totalDescontos += resultINSS.valorDesconto;
       totalINSSEmpregado += resultINSS.valorDesconto;
@@ -79,7 +84,7 @@ export async function POST(request: Request) {
       const resultIRRF = calcularIRRF({ salarioBruto: salario, inssDescontado: resultINSS.valorDesconto, numeroDependentes });
       if (resultIRRF.valorDesconto > 0) {
         await db.itemFolha.create({
-          data: { folhaId: folha.id, funcionarioId: func.id, rubricaId: rubricaIRRF.id, descricao: `IRRF — ${resultIRRF.aliquota}%`, tipo: "DESCONTO", valor: resultIRRF.valorDesconto, manual: false },
+          data: { folhaId: folha.id, funcionarioId: func.id, rubricaId: rubricaIRRF.id, descricao: `IRRF — ${resultIRRF.aliquota}%`, tipo: "DESCONTO", valor: resultIRRF.valorDesconto, baseIRRF: salario - resultINSS.valorDesconto, manual: false },
         });
         totalDescontos += resultIRRF.valorDesconto;
         totalIRRF += resultIRRF.valorDesconto;
@@ -88,7 +93,7 @@ export async function POST(request: Request) {
       const aliquotaFGTS = parseFloat((tabelaFGTS?.aliquota ?? 8).toString());
       const valorFGTS = calcularFGTS(salario, aliquotaFGTS);
       await db.itemFolha.create({
-        data: { folhaId: folha.id, funcionarioId: func.id, rubricaId: rubricaFGTS.id, descricao: `FGTS ${aliquotaFGTS}%`, tipo: "INFORMATIVO", valor: valorFGTS, manual: false },
+        data: { folhaId: folha.id, funcionarioId: func.id, rubricaId: rubricaFGTS.id, descricao: `FGTS ${aliquotaFGTS}%`, tipo: "INFORMATIVO", valor: valorFGTS, baseFGTS: salario, manual: false },
       });
       totalFGTS += valorFGTS;
 

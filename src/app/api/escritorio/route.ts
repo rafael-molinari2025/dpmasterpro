@@ -14,7 +14,10 @@ export async function GET() {
   });
   if (!escritorio) return NextResponse.json({ error: "Escritório não encontrado" }, { status: 404 });
 
-  return NextResponse.json(escritorio);
+  return NextResponse.json({
+    ...escritorio,
+    esocialAmbienteVar: process.env.ESOCIAL_AMBIENTE ?? "2",
+  });
 }
 
 export async function PATCH(request: Request) {
@@ -27,7 +30,15 @@ export async function PATCH(request: Request) {
     const { configuracoes, nome, email, telefone } = body;
 
     const data: Record<string, unknown> = {};
-    if (configuracoes !== undefined) data.configuracoes = configuracoes;
+    if (configuracoes !== undefined) {
+      const atual = await db.escritorio.findUnique({
+        where: { id: escritorioId },
+        select: { configuracoes: true },
+      });
+      const cfgAtual = (atual?.configuracoes as Record<string, unknown>) ?? {};
+      const cfgNovo = configuracoes as Record<string, unknown>;
+      data.configuracoes = { ...cfgAtual, ...cfgNovo };
+    }
     if (nome !== undefined) data.nome = nome;
     if (email !== undefined) data.email = email;
     if (telefone !== undefined) data.telefone = telefone;

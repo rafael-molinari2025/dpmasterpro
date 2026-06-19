@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-guard";
+import { hasPermissao } from "@/lib/permissoes";
 import { registrarLog } from "@/lib/logger";
 
 export async function GET(request: Request) {
@@ -52,7 +53,11 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const guard = await requireAuth();
   if (!guard.ok) return guard.response;
-  const { escritorioId } = guard.session;
+  const { escritorioId, perfil, permissoes } = guard.session;
+
+  if (!hasPermissao(perfil, permissoes as string[], "funcionarios")) {
+    return NextResponse.json({ error: "Sem permissão para cadastrar funcionários" }, { status: 403 });
+  }
 
   try {
     const body = await request.json();

@@ -50,7 +50,7 @@ export default async function RubricasPage({
       <div className="flex-1 p-3 sm:p-6 space-y-6">
 
         <form method="GET" className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-wrap">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-wrap min-w-0 flex-1">
             <input
               type="text"
               name="q"
@@ -73,10 +73,13 @@ export default async function RubricasPage({
               Filtrar
             </button>
           </div>
-          <button className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors">
+          <a
+            href="/rubricas/nova"
+            className="flex-shrink-0 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
+          >
             <Plus className="w-4 h-4" />
             Nova Rubrica
-          </button>
+          </a>
         </form>
 
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
@@ -88,7 +91,7 @@ export default async function RubricasPage({
           ) : (
             <>
               <div className="overflow-x-auto">
-                <table className="w-full">
+                <table className="w-full min-w-[680px]">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
                       <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Código</th>

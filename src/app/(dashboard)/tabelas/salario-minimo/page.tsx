@@ -25,9 +25,9 @@ export default async function SalarioMinimoPage() {
   return (
     <>
       <Header title="Salário Mínimo" subtitle="Vigência e histórico de reajustes" />
-      <div className="flex-1 p-6 space-y-6">
+      <div className="flex-1 p-3 sm:p-6 space-y-6">
 
-        <div className="bg-green-50 border border-green-200 rounded-xl p-5 flex items-center gap-6">
+        <div className="bg-green-50 border border-green-200 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
           <div className="text-center">
             <p className="text-xs text-green-700 font-medium uppercase tracking-wide">Salário Mínimo {smAtual.ano}</p>
             <p className="text-4xl font-bold text-green-800 mt-1">R$ {fmt(smAtual.valor)}</p>
@@ -73,7 +73,8 @@ export default async function SalarioMinimoPage() {
             <TrendingUp className="w-4 h-4 text-blue-600" />
             <h2 className="font-semibold text-gray-900">Histórico de Reajustes</h2>
           </div>
-          <table className="w-full">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[480px]">
             <thead className="bg-gray-50">
               <tr>
                 <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Ano</th>
@@ -100,6 +101,7 @@ export default async function SalarioMinimoPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
 
       </div>

@@ -101,7 +101,7 @@ export default async function FeriasPage({
         </div>
 
         <form method="GET" className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-wrap">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-wrap min-w-0 flex-1">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
@@ -139,7 +139,7 @@ export default async function FeriasPage({
           </div>
           <Link
             href="/ferias/nova"
-            className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
+            className="flex-shrink-0 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
           >
             <Plus className="w-4 h-4" />
             Programar Férias

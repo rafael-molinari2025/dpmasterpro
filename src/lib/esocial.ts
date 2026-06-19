@@ -335,8 +335,8 @@ export function gerarS2200(empresa: EmpresaESocial, funcionario: {
           cpfTrab: funcionario.cpf.replace(/\D/g, ""),
           nmTrab: funcionario.nome,
           sexo: funcionario.sexo,
-          racaCor: "0",
-          estCiv: "0",
+          racaCor: "6", // Tabela 07: 6 = Não declarado (código 0 é inválido)
+          estCiv: "9", // Tabela 06: 9 = Não informado (código 0 é inválido)
           grauInstr: "07",
           nascimento: {
             dtNascto: funcionario.dataNascimento,

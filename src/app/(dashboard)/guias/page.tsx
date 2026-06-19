@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import Header from "@/components/layout/Header";
 import Link from "next/link";
 import { CheckCircle, Clock, AlertTriangle } from "lucide-react";
+import GuiaLinhaAcoes from "./GuiaLinhaAcoes";
 
 const tipoGuiaInfo: Record<string, { label: string; cor: string; vencimento: string }> = {
   GPS_INSS:     { label: "GPS — INSS",    cor: "bg-blue-50 text-blue-700 border-blue-200",     vencimento: "Dia 20 do mês seguinte" },
@@ -75,7 +76,7 @@ export default async function GuiasPage({
 
         {/* Filters */}
         <form method="GET" className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 min-w-0 flex-1">
             <select
               name="tipo"
               defaultValue={tipo ?? ""}
@@ -112,7 +113,7 @@ export default async function GuiasPage({
           </div>
           <Link
             href="/folha/processar"
-            className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
+            className="flex-shrink-0 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
           >
             Gerar via Folha
           </Link>
@@ -145,6 +146,7 @@ export default async function GuiasPage({
                       <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Vencimento</th>
                       <th className="text-right px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Valor</th>
                       <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Status</th>
+                      <th className="px-5 py-3"></th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
@@ -184,6 +186,9 @@ export default async function GuiasPage({
                                 <Clock className="w-3 h-3" /> Pendente
                               </span>
                             )}
+                          </td>
+                          <td className="px-5 py-4">
+                            <GuiaLinhaAcoes guiaId={g.id} status={g.status} />
                           </td>
                         </tr>
                       );

@@ -2,7 +2,8 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 import Header from "@/components/layout/Header";
-import { Plus, Layers, Users } from "lucide-react";
+import { Layers, Users } from "lucide-react";
+import SetoresAcoes from "./SetoresAcoes";
 
 export default async function SetoresPage({
   searchParams,
@@ -38,69 +39,74 @@ export default async function SetoresPage({
   return (
     <>
       <Header title="Setores" subtitle="Estrutura de departamentos e centros de custo" />
-      <div className="flex-1 p-6 space-y-6">
+      <div className="flex-1 p-3 sm:p-6 space-y-4 sm:space-y-6">
 
-        <form method="GET" className="flex items-center justify-between">
-          <select
-            name="empresaId"
-            defaultValue={empresaId ?? ""}
-            className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Todas as empresas</option>
-            {empresas.map((e) => (
-              <option key={e.id} value={e.id}>{e.nomeFantasia ?? e.razaoSocial}</option>
-            ))}
-          </select>
-          <button
-            type="button"
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            Novo Setor
-          </button>
-        </form>
+        {/* Toolbar: filtro e botão SEPARADOS para evitar forms aninhados */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <form method="GET" className="flex items-center gap-2">
+            <select
+              name="empresaId"
+              defaultValue={empresaId ?? ""}
+              className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Todas as empresas</option>
+              {empresas.map((e) => (
+                <option key={e.id} value={e.id}>{e.nomeFantasia ?? e.razaoSocial}</option>
+              ))}
+            </select>
+            <button
+              type="submit"
+              className="px-3 py-2 text-sm border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"
+            >
+              Filtrar
+            </button>
+          </form>
+          <SetoresAcoes empresas={empresas} />
+        </div>
 
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           {setores.length === 0 ? (
             <div className="text-center py-16">
               <Layers className="w-12 h-12 text-gray-200 mx-auto mb-3" />
               <p className="text-gray-500 font-medium">Nenhum setor cadastrado</p>
-              <p className="text-sm text-gray-400 mt-1">Os setores são criados ao cadastrar funcionários.</p>
+              <p className="text-sm text-gray-400 mt-1">Clique em "Novo Setor" para cadastrar o primeiro setor.</p>
             </div>
           ) : (
             <>
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Setor / Departamento</th>
-                    <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Empresa</th>
-                    <th className="text-center px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Funcionários</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {setores.map((s) => (
-                    <tr key={s.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-5 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-teal-100 flex items-center justify-center flex-shrink-0">
-                            <Layers className="w-4 h-4 text-teal-600" />
-                          </div>
-                          <p className="text-sm font-medium text-gray-900">{s.descricao}</p>
-                        </div>
-                      </td>
-                      <td className="px-5 py-4 text-sm text-gray-600">
-                        {s.empresa.nomeFantasia ?? s.empresa.razaoSocial}
-                      </td>
-                      <td className="px-5 py-4 text-center">
-                        <span className="flex items-center justify-center gap-1 text-sm text-gray-600">
-                          <Users className="w-3 h-3" />
-                          {s._count.funcionarios}
-                        </span>
-                      </td>
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[420px]">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Setor / Departamento</th>
+                      <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Empresa</th>
+                      <th className="text-center px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Funcionários</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {setores.map((s) => (
+                      <tr key={s.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-teal-100 flex items-center justify-center flex-shrink-0">
+                              <Layers className="w-4 h-4 text-teal-600" />
+                            </div>
+                            <p className="text-sm font-medium text-gray-900">{s.descricao}</p>
+                          </div>
+                        </td>
+                        <td className="px-5 py-4 text-sm text-gray-600">
+                          {s.empresa.nomeFantasia ?? s.empresa.razaoSocial}
+                        </td>
+                        <td className="px-5 py-4 text-center">
+                          <span className="flex items-center justify-center gap-1 text-sm text-gray-600">
+                            <Users className="w-3 h-3" />
+                            {s._count.funcionarios}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
               <div className="px-5 py-3 border-t border-gray-100">
                 <p className="text-xs text-gray-500">{setores.length} setor{setores.length !== 1 ? "es" : ""} cadastrado{setores.length !== 1 ? "s" : ""}</p>
               </div>

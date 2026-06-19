@@ -2,7 +2,8 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 import Header from "@/components/layout/Header";
-import { Plus, Search, MoreVertical, Users } from "lucide-react";
+import { Plus, Search, Settings, Users } from "lucide-react";
+import Link from "next/link";
 
 const situacaoStyle: Record<string, string> = {
   ATIVO: "bg-green-50 text-green-700",
@@ -70,7 +71,7 @@ export default async function FuncionariosPage({
       <div className="flex-1 p-3 sm:p-6">
 
         <form method="GET" className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-wrap">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-wrap min-w-0 flex-1">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
@@ -108,7 +109,7 @@ export default async function FuncionariosPage({
           </div>
           <a
             href="/funcionarios/novo"
-            className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
+            className="flex-shrink-0 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
           >
             <Plus className="w-4 h-4" />
             Novo Funcionário
@@ -182,9 +183,13 @@ export default async function FuncionariosPage({
                         </span>
                       </td>
                       <td className="px-5 py-4">
-                        <button className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors">
-                          <MoreVertical className="w-4 h-4" />
-                        </button>
+                        <Link
+                          href={`/funcionarios/${f.id}`}
+                          className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-blue-600 px-2 py-1.5 rounded-lg border border-gray-200 hover:border-blue-200 hover:bg-blue-50 transition-colors"
+                        >
+                          <Settings className="w-3.5 h-3.5" />
+                          Editar
+                        </Link>
                       </td>
                     </tr>
                   ))}

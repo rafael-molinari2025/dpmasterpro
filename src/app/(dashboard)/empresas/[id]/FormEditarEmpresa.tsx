@@ -164,9 +164,9 @@ export default function FormEditarEmpresa({ empresa }: Props) {
     : false;
 
   return (
-    <div className="flex-1 p-6 max-w-4xl">
+    <div className="flex-1 p-3 sm:p-6 max-w-4xl">
       {/* Abas */}
-      <div className="flex border-b border-gray-200 mb-6 gap-0">
+      <div className="flex overflow-x-auto border-b border-gray-200 mb-6 gap-0">
         {[
           { key: "dados", label: "Dados da Empresa", icon: Building2 },
           { key: "esocial", label: "Certificado Digital / eSocial", icon: ShieldCheck },
