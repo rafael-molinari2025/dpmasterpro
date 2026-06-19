@@ -83,7 +83,38 @@ export default async function EmpresasPage({
             </div>
           ) : (
             <>
-              <div className="overflow-x-auto">
+              {/* Cards (mobile) */}
+              <div className="sm:hidden divide-y divide-gray-100">
+                {empresas.map((e) => (
+                  <Link key={e.id} href={`/empresas/${e.id}`} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
+                    <div className="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center text-blue-700 text-sm font-bold flex-shrink-0">
+                      {e.razaoSocial[0]}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">{e.razaoSocial}</p>
+                      <p className="text-xs text-gray-500 truncate">{e.nomeFantasia ?? e.cnpj}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-xs px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
+                          {regimeLabel[e.regimeTributario] ?? e.regimeTributario}
+                        </span>
+                        {e.ativa ? (
+                          <span className="flex items-center gap-0.5 text-xs text-green-700">
+                            <CheckCircle className="w-3 h-3" /> Ativa
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-0.5 text-xs text-red-600">
+                            <XCircle className="w-3 h-3" /> Inativa
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <Settings className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  </Link>
+                ))}
+              </div>
+
+              {/* Tabela (tablet/desktop) */}
+              <div className="hidden sm:block overflow-x-auto">
               <table className="w-full min-w-[580px]">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
@@ -146,6 +177,7 @@ export default async function EmpresasPage({
                 </tbody>
               </table>
               </div>
+
               <div className="px-5 py-3 border-t border-gray-100">
                 <p className="text-xs text-gray-500">
                   {empresas.length} empresa{empresas.length !== 1 ? "s" : ""} encontrada{empresas.length !== 1 ? "s" : ""}
