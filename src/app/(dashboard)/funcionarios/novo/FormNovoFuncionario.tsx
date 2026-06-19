@@ -118,7 +118,7 @@ export default function FormNovoFuncionario({ empresas, cargos, setores }: Props
   }
 
   return (
-    <div className="flex-1 p-6">
+    <div className="flex-1 p-3 sm:p-6">
       <div className="max-w-4xl mx-auto">
         <div className="mb-4">
           <a href="/funcionarios" className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700">
@@ -137,10 +137,10 @@ export default function FormNovoFuncionario({ empresas, cargos, setores }: Props
         <form onSubmit={handleSubmit} className="space-y-6">
 
           {/* Empresa e Matrícula */}
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-5">
             <h2 className="text-sm font-semibold text-gray-800 mb-4">Empresa e Vínculo</h2>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="col-span-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="sm:col-span-2">
                 <label className={label}>Empresa *</label>
                 <select
                   name="empresaId"
@@ -204,10 +204,10 @@ export default function FormNovoFuncionario({ empresas, cargos, setores }: Props
           </div>
 
           {/* Dados Pessoais */}
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-5">
             <h2 className="text-sm font-semibold text-gray-800 mb-4">Dados Pessoais</h2>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="col-span-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="sm:col-span-3">
                 <label className={label}>Nome Completo *</label>
                 <input type="text" name="nome" required className={input} placeholder="Nome completo do funcionário" />
               </div>
@@ -279,10 +279,10 @@ export default function FormNovoFuncionario({ empresas, cargos, setores }: Props
           </div>
 
           {/* Contato */}
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-5">
             <h2 className="text-sm font-semibold text-gray-800 mb-4">Contato</h2>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="col-span-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="sm:col-span-2">
                 <label className={label}>E-mail</label>
                 <input type="email" name="email" className={input} placeholder="email@exemplo.com" />
               </div>
@@ -298,9 +298,9 @@ export default function FormNovoFuncionario({ empresas, cargos, setores }: Props
           </div>
 
           {/* Endereço */}
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-5">
             <h2 className="text-sm font-semibold text-gray-800 mb-4">Endereço</h2>
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div>
                 <label className={label}>CEP</label>
                 <input type="text" name="endCEP" className={input} placeholder="00000-000" maxLength={9} />
@@ -336,9 +336,9 @@ export default function FormNovoFuncionario({ empresas, cargos, setores }: Props
           </div>
 
           {/* Dados Trabalhistas */}
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-5">
             <h2 className="text-sm font-semibold text-gray-800 mb-4">Cargo, Setor e Jornada</h2>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label className={label}>Cargo</label>
                 <select name="cargoId" className={input} defaultValue="">
@@ -369,7 +369,7 @@ export default function FormNovoFuncionario({ empresas, cargos, setores }: Props
                   <option value="HORISTA">Horista</option>
                 </select>
               </div>
-              <div className="col-span-2">
+              <div className="sm:col-span-2">
                 <label className={label}>Categoria eSocial</label>
                 <select name="categoriaESocial" className={input} defaultValue="101">
                   <option value="101">101 — Empregado Geral CLT</option>
@@ -386,9 +386,9 @@ export default function FormNovoFuncionario({ empresas, cargos, setores }: Props
           </div>
 
           {/* Documentos */}
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-5">
             <h2 className="text-sm font-semibold text-gray-800 mb-4">Documentos</h2>
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div>
                 <label className={label}>CTPS</label>
                 <input type="text" name="ctps" className={input} placeholder="Número" />
@@ -412,9 +412,9 @@ export default function FormNovoFuncionario({ empresas, cargos, setores }: Props
           </div>
 
           {/* Dados Bancários */}
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-5">
             <h2 className="text-sm font-semibold text-gray-800 mb-4">Dados Bancários</h2>
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div>
                 <label className={label}>Banco</label>
                 <input type="text" name="banco" className={input} placeholder="Ex: 001" />
@@ -441,17 +441,17 @@ export default function FormNovoFuncionario({ empresas, cargos, setores }: Props
           </div>
 
           {/* Botões */}
-          <div className="flex items-center justify-end gap-3 pb-6">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center sm:justify-end gap-3 pb-6">
             <a
               href="/funcionarios"
-              className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+              className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors text-center"
             >
               Cancelar
             </a>
             <button
               type="submit"
               disabled={loading || !empresaId}
-              className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center justify-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <Save className="w-4 h-4" />
               {loading ? "Salvando..." : "Cadastrar Funcionário"}
