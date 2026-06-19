@@ -48,9 +48,9 @@ export default async function EmpresaDetailPage({
         title={empresa.nomeFantasia ?? empresa.razaoSocial}
         subtitle={`CNPJ ${empresa.cnpj} • ${totalFunc} funcionário${totalFunc !== 1 ? "s" : ""}`}
       />
-      <div className="flex-1 p-6">
+      <div className="flex-1 p-3 sm:p-6">
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 mb-6 text-sm text-gray-500">
+        <div className="flex items-center gap-2 mb-4 sm:mb-6 text-sm text-gray-500">
           <Link href="/empresas" className="flex items-center gap-1.5 hover:text-blue-600 transition-colors">
             <ArrowLeft className="w-4 h-4" />
             Empresas

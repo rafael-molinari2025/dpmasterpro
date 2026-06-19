@@ -164,7 +164,7 @@ export default function FormEditarEmpresa({ empresa }: Props) {
     : false;
 
   return (
-    <div className="flex-1 p-3 sm:p-6 max-w-4xl">
+    <div className="max-w-4xl">
       {/* Abas */}
       <div className="flex border-b border-gray-200 mb-6 gap-0">
         {[
