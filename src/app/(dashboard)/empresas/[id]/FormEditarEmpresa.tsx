@@ -164,7 +164,7 @@ export default function FormEditarEmpresa({ empresa }: Props) {
     : false;
 
   return (
-    <div className="flex-1 p-6 max-w-4xl">
+    <div className="flex-1 p-3 sm:p-6 max-w-4xl">
       {/* Abas */}
       <div className="flex border-b border-gray-200 mb-6 gap-0">
         {[
@@ -174,14 +174,14 @@ export default function FormEditarEmpresa({ empresa }: Props) {
           <button
             key={key}
             onClick={() => setTab(key as Tab)}
-            className={`flex items-center gap-2 px-5 py-3 text-sm font-medium border-b-2 transition-colors -mb-px ${
+            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-medium border-b-2 transition-colors -mb-px ${
               tab === key
                 ? "border-blue-600 text-blue-700"
                 : "border-transparent text-gray-500 hover:text-gray-700"
             }`}
           >
-            <Icon className="w-4 h-4" />
-            {label}
+            <Icon className="w-4 h-4 flex-shrink-0" />
+            <span>{label}</span>
           </button>
         ))}
       </div>
@@ -190,7 +190,7 @@ export default function FormEditarEmpresa({ empresa }: Props) {
       {tab === "dados" && (
         <div className="space-y-6">
           {/* Identificação */}
-          <section className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+          <section className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 space-y-4">
             <h2 className="font-semibold text-gray-800">Identificação</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="sm:col-span-2">
@@ -225,7 +225,7 @@ export default function FormEditarEmpresa({ empresa }: Props) {
           </section>
 
           {/* Tributação */}
-          <section className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+          <section className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 space-y-4">
             <h2 className="font-semibold text-gray-800">Tributação</h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
@@ -259,7 +259,7 @@ export default function FormEditarEmpresa({ empresa }: Props) {
           </section>
 
           {/* Responsável */}
-          <section className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+          <section className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 space-y-4">
             <h2 className="font-semibold text-gray-800">Responsável e Contato</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
@@ -282,7 +282,7 @@ export default function FormEditarEmpresa({ empresa }: Props) {
           </section>
 
           {/* Endereço */}
-          <section className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+          <section className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 space-y-4">
             <h2 className="font-semibold text-gray-800">Endereço</h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="sm:col-span-2">
@@ -336,7 +336,7 @@ export default function FormEditarEmpresa({ empresa }: Props) {
       {tab === "esocial" && (
         <div className="space-y-5">
           {/* Status atual */}
-          <section className="bg-white rounded-xl border border-gray-200 p-6">
+          <section className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6">
             <h2 className="font-semibold text-gray-800 mb-4">Status do Certificado Digital A1</h2>
 
             {certInfo?.configurado ? (
@@ -391,7 +391,7 @@ export default function FormEditarEmpresa({ empresa }: Props) {
 
           {/* Upload novo certificado */}
           {!removerCert && (
-            <section className="bg-white rounded-xl border border-gray-200 p-6 space-y-5">
+            <section className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 space-y-5">
               <h2 className="font-semibold text-gray-800">
                 {certInfo?.configurado ? "Substituir Certificado" : "Configurar Certificado Digital"}
               </h2>
@@ -471,7 +471,7 @@ export default function FormEditarEmpresa({ empresa }: Props) {
       )}
 
       {/* Feedback + Botão Salvar */}
-      <div className="mt-6 flex items-center gap-4">
+      <div className="mt-6 flex flex-wrap items-center gap-3">
         <button
           onClick={salvar}
           disabled={salvando}
