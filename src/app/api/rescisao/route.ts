@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/auth-guard";
 import { hasPermissao } from "@/lib/permissoes";
 import { registrarLog } from "@/lib/logger";
+import { calcularRescisao } from "@/lib/calculo-folha";
 
 export async function POST(request: Request) {
   const guard = await requireAuth();
@@ -22,7 +23,10 @@ export async function POST(request: Request) {
 
     const funcionario = await db.funcionario.findFirst({
       where: { id: funcionarioId, empresa: { escritorioId } },
-      include: { empresa: { select: { razaoSocial: true } } },
+      include: {
+        empresa: { select: { razaoSocial: true } },
+        dependentes: { where: { deducaoIRRF: true }, select: { id: true } },
+      },
     });
     if (!funcionario) {
       return NextResponse.json({ error: "Funcionário não encontrado" }, { status: 404 });
@@ -30,6 +34,14 @@ export async function POST(request: Request) {
     if (funcionario.situacao === "DEMITIDO") {
       return NextResponse.json({ error: "Funcionário já está demitido" }, { status: 409 });
     }
+
+    const resultado = calcularRescisao({
+      salario: parseFloat(funcionario.salario.toString()),
+      dataAdmissao: new Date(funcionario.dataAdmissao),
+      dataDemissao: new Date(dataDemissao),
+      tipoRescisao,
+      numDependentes: funcionario.dependentes.length,
+    });
 
     await db.funcionario.update({
       where: { id: funcionarioId },
@@ -47,11 +59,11 @@ export async function POST(request: Request) {
       tipo: "FUNCIONARIO",
       modulo: "rescisao",
       acao: "DEMITIR",
-      descricao: `Rescisão registrada: ${funcionario.nome} — ${tipoRescisao} (${funcionario.empresa.razaoSocial})`,
-      detalhes: { funcionarioId, tipoRescisao, dataDemissao },
+      descricao: `Rescisão registrada: ${funcionario.nome} — ${tipoRescisao} (${funcionario.empresa.razaoSocial}) — Líquido: R$ ${resultado.totalLiquido.toFixed(2)}`,
+      detalhes: { funcionarioId, tipoRescisao, dataDemissao, ...resultado },
     });
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, resultado, funcionario: { nome: funcionario.nome } });
   } catch (error: any) {
     console.error("Erro ao registrar rescisão:", error);
     return NextResponse.json({ error: "Erro ao registrar rescisão" }, { status: 500 });

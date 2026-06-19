@@ -51,6 +51,8 @@ export async function POST(request: Request) {
     const rubricaINSS = await db.rubrica.findUnique({ where: { codigo: "1000" } });
     const rubricaIRRF = await db.rubrica.findUnique({ where: { codigo: "1001" } });
     const rubricaFGTS = await db.rubrica.findUnique({ where: { codigo: "9001" } });
+    const rubricaVT = await db.rubrica.findFirst({ where: { codigo: { in: ["1010", "1011"] } } });
+    const rubricaVR = await db.rubrica.findFirst({ where: { codigo: { in: ["1020", "1021"] } } });
 
     if (!rubricaSalario || !rubricaINSS || !rubricaIRRF || !rubricaFGTS) {
       return NextResponse.json({ error: "Rubricas padrão não encontradas. Execute o seed primeiro." }, { status: 500 });
@@ -91,6 +93,29 @@ export async function POST(request: Request) {
         data: { folhaId: folha.id, funcionarioId: func.id, rubricaId: rubricaFGTS.id, descricao: `FGTS ${aliquotaFGTS}%`, tipo: "INFORMATIVO", valor: valorFGTS, manual: false },
       });
       totalFGTS += valorFGTS;
+
+      // Vale-Transporte — desconto de 6% do salário (Art. 9º Lei 7.418/85)
+      if (rubricaVT) {
+        const vtBruto = (rubricaVT as any).valorFixo ?? 0;
+        const vtDesconto = Math.min(salario * 0.06, vtBruto > 0 ? vtBruto : salario * 0.06);
+        if (vtDesconto > 0) {
+          await db.itemFolha.create({
+            data: { folhaId: folha.id, funcionarioId: func.id, rubricaId: rubricaVT.id, descricao: "Vale-Transporte (6%)", tipo: "DESCONTO", valor: Math.round(vtDesconto * 100) / 100, manual: false },
+          });
+          totalDescontos += Math.round(vtDesconto * 100) / 100;
+        }
+      }
+
+      // Vale-Refeição — desconto fixo ou percentual se houver rubrica configurada
+      if (rubricaVR) {
+        const vrFixo = (rubricaVR as any).valorFixo ?? 0;
+        if (vrFixo > 0) {
+          await db.itemFolha.create({
+            data: { folhaId: folha.id, funcionarioId: func.id, rubricaId: rubricaVR.id, descricao: "Vale-Refeição (desconto)", tipo: "DESCONTO", valor: vrFixo, manual: false },
+          });
+          totalDescontos += vrFixo;
+        }
+      }
 
       const aliquotaPatronal = empresa.recolheINSSPatronal ? 0.20 : 0;
       const ratFap = parseFloat((empresa.aliquotaRAT ?? 1).toString()) / 100;

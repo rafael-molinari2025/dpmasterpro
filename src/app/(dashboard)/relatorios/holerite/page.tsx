@@ -110,10 +110,13 @@ export default async function HoleritePage({
       grupos[fid].itens.push(item);
       if (item.tipo === "PROVENTO") grupos[fid].totalProventos += v;
       if (item.tipo === "DESCONTO") grupos[fid].totalDescontos += v;
+      // FGTS vem do item INFORMATIVO com rubrica 9001
+      if (item.tipo === "INFORMATIVO" && item.rubrica?.codigo === "9001") grupos[fid].fgts += v;
     }
     for (const g of Object.values(grupos)) {
       g.liquido = g.totalProventos - g.totalDescontos;
-      g.fgts = g.totalProventos * 0.08;
+      // Fallback: se não houver item FGTS, estima 8% dos proventos
+      if (g.fgts === 0) g.fgts = Math.round(g.totalProventos * 0.08 * 100) / 100;
     }
     itensAgrupados = Object.values(grupos);
   }
