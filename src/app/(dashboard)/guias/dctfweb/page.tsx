@@ -8,6 +8,7 @@ function fmt(v: number) {
   return v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+const statusLabel: Record<string, string> = { PENDENTE: "Pendente", PAGO: "Pago", VENCIDA: "Vencida" };
 const statusStyle: Record<string, string> = {
   PENDENTE: "bg-amber-50 text-amber-700",
   PAGO: "bg-green-50 text-green-700",
@@ -93,14 +94,14 @@ export default async function GuiasDCTFWebPage({
             {/* Cards (mobile) */}
             <div className="sm:hidden space-y-3">
               {guias.map((g) => (
-                <div key={g.id} className="bg-white rounded-xl border border-gray-200 p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
+                <div key={g.id} className="bg-white rounded-xl border border-gray-200 p-4 overflow-hidden">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-gray-900 truncate">{g.empresa.nomeFantasia ?? g.empresa.razaoSocial}</p>
-                      <p className="text-xs font-mono text-gray-400 mt-0.5">{g.empresa.cnpj}</p>
+                      <p className="text-xs font-mono text-gray-400 mt-0.5 truncate">{g.empresa.cnpj}</p>
                     </div>
-                    <span className={`flex-shrink-0 text-xs px-2 py-1 rounded-full font-medium ${statusStyle[g.status] ?? "bg-gray-100 text-gray-600"}`}>
-                      {g.status}
+                    <span className={`shrink-0 text-xs px-2 py-1 rounded-full font-medium ${statusStyle[g.status] ?? "bg-gray-100 text-gray-600"}`}>
+                      {statusLabel[g.status] ?? g.status}
                     </span>
                   </div>
                   <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-gray-600">

@@ -241,24 +241,77 @@ export default function LogsViewer() {
         </div>
       </div>
 
-      {/* Tabela */}
+      {/* Logs — cabeçalho com paginação */}
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
           <p className="text-sm text-gray-600">
             {loading ? "Carregando…" : `${total.toLocaleString("pt-BR")} registro${total !== 1 ? "s" : ""}${temFiltro ? " (filtrado)" : ""}`}
           </p>
           <div className="flex items-center gap-2 text-sm text-gray-500">
-            <span>Página {page} de {totalPages}</span>
+            <span className="hidden sm:inline">Página {page} de {totalPages}</span>
             <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1 || loading} className="p-1 rounded hover:bg-gray-100 disabled:opacity-30">
               <ChevronLeft className="w-4 h-4" />
             </button>
+            <span className="sm:hidden text-xs">{page}/{totalPages}</span>
             <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages || loading} className="p-1 rounded hover:bg-gray-100 disabled:opacity-30">
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Cards (mobile) */}
+        <div className="sm:hidden divide-y divide-gray-100">
+          {logs.length === 0 && !loading && (
+            <p className="px-4 py-12 text-center text-gray-400 text-sm">
+              {temFiltro ? "Nenhum log encontrado com esses filtros." : "Nenhum log registrado ainda."}
+            </p>
+          )}
+          {logs.map((log) => {
+            const isOpen = expandido === log.id;
+            return (
+              <div key={log.id}>
+                <button
+                  className="w-full text-left p-4"
+                  onClick={() => setExpandido(isOpen ? null : log.id)}
+                >
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <NivelBadge nivel={log.nivel} />
+                    <span className="text-xs text-gray-400 font-mono shrink-0">{formatDate(log.createdAt)}</span>
+                  </div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs text-gray-500">{TIPO_LABEL[log.tipo] ?? log.tipo}</span>
+                    <span className="text-gray-300">·</span>
+                    <span className="text-xs font-mono text-gray-600">{log.acao}</span>
+                  </div>
+                  <p className="text-xs text-gray-700 truncate">{log.descricao}</p>
+                  {log.nomeUsuario && (
+                    <p className="text-xs text-gray-400 mt-1">{log.nomeUsuario}</p>
+                  )}
+                  {log.detalhes && (
+                    <span className="mt-2 inline-flex items-center gap-1 text-xs text-blue-600">
+                      {isOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                      {isOpen ? "Fechar" : "Ver detalhes"}
+                    </span>
+                  )}
+                </button>
+                {isOpen && log.detalhes && (
+                  <div className="px-4 pb-4">
+                    <div className="bg-gray-50 rounded-lg border border-gray-200 p-3">
+                      <p className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">Detalhes</p>
+                      <pre className="text-xs text-gray-700 whitespace-pre-wrap break-all font-mono leading-relaxed max-h-60 overflow-y-auto">
+                        {JSON.stringify(log.detalhes, null, 2)}
+                      </pre>
+                      {log.ip && <p className="text-xs text-gray-400 mt-2">IP: {log.ip}</p>}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Tabela (tablet/desktop) */}
+        <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>
